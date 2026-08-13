@@ -154,6 +154,26 @@ check people learn to ignore is worse than no check.
 
 ---
 
+## Publishing — `main` is NOT the branch the site serves
+
+The live site is served from **`gh-pages`**. `main` holds the source. Pushing a
+fix to `main` changes nothing that a researcher can see, and the push succeeds,
+which is what makes the mistake so easy to make and so easy to announce.
+
+One command, always:
+
+    python tools/publish.py "Rebuild: what changed"
+
+It builds, refuses to go on unless every check above passes, re-checks that
+nothing but pages and assets is about to become public, replaces `gh-pages`
+wholesale — so a page deleted from `dist/` actually disappears from the site —
+pushes, and then polls the live URL until it serves the build just made. It
+does not print `LIVE` until the live page proves it.
+
+Do not push `dist/` by hand, and do not trust a green push to `main`.
+
+---
+
 ## Layout
 
     build.py                 renders dist/ and runs every check
@@ -164,6 +184,7 @@ check people learn to ignore is worse than no check.
     tools/survey_workbooks.py  reads the source workbooks
     tools/schema.py          workbook + decisions -> the spec each page renders
     tools/check_registry.py  registry sanity, run it after editing the registry
+    tools/publish.py         build + push to gh-pages + verify it went live
     assets/                  shared css, js, logo — one copy for all pages
       form.js                the form itself
       xlsx.js / xlsx_read.js writing and reading .xlsx, no dependencies
