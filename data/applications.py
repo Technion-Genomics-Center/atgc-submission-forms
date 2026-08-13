@@ -343,8 +343,9 @@ APPLICATIONS = [
              qubit=dict(
                  label="Do you require Qubit?",
                  kit_label="Qubit kit",
-                 kits=["High sensitivity DNA", "Broad range RNA",
-                       "High sensitivity RNA"]),
+                 # Broad range RNA withdrawn 2026-08-13 — no longer used.
+                 # The workbook's Setting sheet still lists it; this list wins.
+                 kits=["High sensitivity DNA", "High sensitivity RNA"]),
              tapestation=dict(
                  label="Do you require TapeStation?",
                  type_label="DNA or RNA?",
