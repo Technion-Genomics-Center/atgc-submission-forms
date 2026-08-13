@@ -1,0 +1,15 @@
+﻿form_term,catalog_name,confidence,note,used_on_forms
+Amplicon-seq,Amplicon library prep,high,only amplicon prep in the catalog,metagenomics-16s-18s; shotgun-metagenomics; amplicon-seq; dna-seq; exome-seq; chip-seq-cut-and-run; rrbs; user-prepared; nanopore; cell-line-authentication; infinium-methylation
+ChIP-seq,ChIP-seq library prep,high,"exact service, longer name",metagenomics-16s-18s; shotgun-metagenomics; amplicon-seq; dna-seq; exome-seq; chip-seq-cut-and-run; rrbs; user-prepared; nanopore; infinium-methylation
+RRBS,RRBS library prep,high,"exact service, longer name",metagenomics-16s-18s; shotgun-metagenomics; amplicon-seq; dna-seq; exome-seq; chip-seq-cut-and-run; rrbs; user-prepared; nanopore; cell-line-authentication; infinium-methylation
+Exome,Twist Exome library prep,high,only exome prep in the catalog,metagenomics-16s-18s; shotgun-metagenomics; amplicon-seq; dna-seq; exome-seq; chip-seq-cut-and-run; rrbs; user-prepared; nanopore; cell-line-authentication; infinium-methylation
+miRNA-seq,miRNA-seq library prep,high,"exact service, longer name",rnaseq; mirna-seq; extraction
+10x 5' GEX+BCR,10x 5' GEX+BCR/TCR,high,catalog adds /TCR,scrna-seq-10x
+16S,16S library prep,ok,Nitsan 2026-08-12 — only this one is offered,metagenomics-16s-18s; shotgun-metagenomics; amplicon-seq; dna-seq; exome-seq; chip-seq-cut-and-run; rrbs; user-prepared; nanopore; cell-line-authentication; infinium-methylation
+NEBNext directional RNA library prep,NEBNext Ultra II Directional RNA Library Prep,superseded,replaced on the RNA-seq form by three named kits — see applications.py,rnaseq; mirna-seq; extraction
+NEBNext directional RNA library prep [rRNA removal],NEBNext Directional RNA Library Prep [rRNA removal bacteria],superseded,replaced on the RNA-seq form by three named kits — see applications.py,rnaseq; mirna-seq; extraction
+10X 3' GEM-X GE library prep,10X scRNA-seq library prep,ok,Nitsan 2026-08-12,scrna-seq-10x
+10X Feature Barcode,10X scRNA-seq Feature Barcode,ok,Nitsan 2026-08-12,scrna-seq-10x
+10X fixed scRNA-seq lib prep [1BC],,CHECK,"catalog splits by sample count: [1BC, 2/3/4/6 samples]",scrna-seq-10x
+10X fixed scRNA-seq lib prep [4BC],,CHECK,"catalog splits by sample count: [4BC, 4/8 samples]",scrna-seq-10x
+Other,,keep,"genuinely 'Other' — no catalog entry, leave as is",rnaseq; metagenomics-16s-18s; shotgun-metagenomics; amplicon-seq; dna-seq; exome-seq; chip-seq-cut-and-run; rrbs; user-prepared; nanopore; mirna-seq; cell-line-authentication; infinium-methylation; extraction

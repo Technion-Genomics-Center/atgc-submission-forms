@@ -1,0 +1,19 @@
+﻿application,website_page,submission_form_url
+10X scRNA-seq,https://atgc.net.technion.ac.il/applications/single-cell-transcriptomics/,https://technion-genomics-center.github.io/atgc-submission-forms/scrna-seq-10x/
+Amplicon-seq,https://atgc.net.technion.ac.il/applications/amplicon-seq/,https://technion-genomics-center.github.io/atgc-submission-forms/amplicon-seq/
+Cell-line authentication,https://atgc.net.technion.ac.il/applications/cell-line-authentication/,https://technion-genomics-center.github.io/atgc-submission-forms/cell-line-authentication/
+ChIP-seq / Cut&Run,https://atgc.net.technion.ac.il/applications/chip-seq/,https://technion-genomics-center.github.io/atgc-submission-forms/chip-seq-cut-and-run/
+DNA / RNA extraction,https://atgc.net.technion.ac.il/applications/dna-rna-extraction/,https://technion-genomics-center.github.io/atgc-submission-forms/extraction/
+DNA-seq,https://atgc.net.technion.ac.il/applications/dna-seq/,https://technion-genomics-center.github.io/atgc-submission-forms/dna-seq/
+DNA/RNA quality and quantity,https://atgc.net.technion.ac.il/applications/dna-rna-quality-and-quantity/,https://technion-genomics-center.github.io/atgc-submission-forms/dna-rna-quality-quantity/
+Exome-seq,https://atgc.net.technion.ac.il/applications/exome-seq/,https://technion-genomics-center.github.io/atgc-submission-forms/exome-seq/
+Infinium methylation,https://atgc.net.technion.ac.il/applications/dna-methylation/,https://technion-genomics-center.github.io/atgc-submission-forms/infinium-methylation/
+Metagenomics — 16S / 18S,https://atgc.net.technion.ac.il/applications/metagenomics/,https://technion-genomics-center.github.io/atgc-submission-forms/metagenomics-16s-18s/
+Olink Reveal,https://atgc.net.technion.ac.il/applications/olink_reveal/,https://technion-genomics-center.github.io/atgc-submission-forms/olink-reveal/
+Oxford Nanopore,https://atgc.net.technion.ac.il/applications/long-read-sequencing/,https://technion-genomics-center.github.io/atgc-submission-forms/nanopore/
+RNA-seq,https://atgc.net.technion.ac.il/applications/rna-seq/,https://technion-genomics-center.github.io/atgc-submission-forms/rnaseq/
+RRBS,https://atgc.net.technion.ac.il/applications/dna-methylation/,https://technion-genomics-center.github.io/atgc-submission-forms/rrbs/
+Shotgun metagenomics,https://atgc.net.technion.ac.il/applications/dna-seq/,https://technion-genomics-center.github.io/atgc-submission-forms/shotgun-metagenomics/
+Spatial transcriptomics,https://atgc.net.technion.ac.il/applications/spatial-transcriptomics/,https://technion-genomics-center.github.io/atgc-submission-forms/spatial-transcriptomics/
+User-prepared library sequencing,https://atgc.net.technion.ac.il/applications/user-prepared-library-sequencing/,https://technion-genomics-center.github.io/atgc-submission-forms/user-prepared/
+miRNA-seq,https://atgc.net.technion.ac.il/applications/mirna-seq/,https://technion-genomics-center.github.io/atgc-submission-forms/mirna-seq/

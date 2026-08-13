@@ -1,0 +1,917 @@
+==============================================================================
+Amplicon-seq-electronic_2025.xlsx
+  title : DNA Sample Information for Amplicon-seq
+  sheets: ['DNA sample submission form', 'Setting']
+  HEADER FIELDS (12):
+       A8  Date:
+       A9  Institute:
+       E9  Email:
+      A10  Phone:
+      E10  Quote number:
+      A11  Basesapce account:
+      E11  Technion budget account number:
+      A15  Select insturment:
+      A19  Run mode:
+      D19  Please specify read length:
+      D21  If selected Other, please specify:
+      A25  Do you require bioinformatic analysis?
+  CHOICE FIELDS (21):
+      A15                                                       <- 
+      C15  Select insturment:                                   <- 
+      A16                                                       <- 
+      B16                                                       <- 
+      C16                                                       <- 
+      D16                                                       <- 
+      E16                                                       <- 
+      F16                                                       <- 
+      A17                                                       <- 
+      B17  Select flow cell                                     <- 
+      B19  Run mode:                                            <- RunMode
+      E19  Please specify read length:                          <- 
+      B21  Select numer of flow cells                           <- Run
+      D23  For Amplicon-seq, please specify %PhiX required-     <- 
+      D25  Do you require bioinformatic analysis?               <- YesNo
+      A26                                                       <- 
+      B26                                                       <- 
+      C26                                                       <- 
+      D26                                                       <- 
+      E26                                                       <- 
+      F26                                                       <- 
+  PER-SAMPLE DROPDOWNS: 1 cells <- ['']
+  SAMPLE COLUMNS (row 12): ['Sample ID', 'Sample name', 'Amplicon size*', 'Species', 'Remarks']
+  SETTING COLUMNS: ['YesNo', 'LibraryPrep', 'Instrument', 'Miseq', 'Nextseq', 'RunMode', 'RunType', 'Conc type']
+==============================================================================
+CELseq-electronic 2025.xlsx   [NOT BUILT — service withdrawn]
+  title : RNA Sample Information for CEL-seq
+  sheets: ['RNA sample submission form', 'Setting']
+  HEADER FIELDS (18):
+       A8  Date:
+       H8  RNA extraction method/kit:
+       A9  Name:
+       E9  Group:
+      A10  Institute:
+      E10  Email:
+      A11  Phone:
+      E11  Quote number:
+      A12  Basesapce account:
+      E12  Technion account number:
+      A15  Do you require RNA QC?
+      A17  Select library preparation:
+      A19  If selected Other, please specify:
+      A21  Select insturment:
+      A25  Run mode:
+      D25  Please specify read length:
+      D27  If selected Other, please specify:
+      A30  Do you require bioinformatic analysis?
+  CHOICE FIELDS (8):
+      B15  Do you require RNA QC?                               <- YesNo
+      B17  Select library preparation:                          <- LibraryPrep
+      C23  Select flow cell                                     <- INDIRECT(B21)
+      B25  Run mode:                                            <- RunMode
+      F25  Please specify read length:                          <- 
+      B27  Select numer of flow cells                           <- Run
+      D30  Do you require bioinformatic analysis?               <- YesNo
+      D31                                                       <- YesNo
+  SAMPLE COLUMNS (row 10): ['Sample ID', 'Sample name', 'ng/ul', 'Quant. Method', 'RIN', '260/280', '260/230', 'Species']
+  SETTING COLUMNS: ['YesNo', 'LibraryPrep', 'Instrument', 'Miseq', 'Nextseq', 'RunMode', 'RunType', 'Conc type']
+==============================================================================
+CLA-electronic_2025.xlsx
+  title : CLA Sample Information
+  sheets: ['CLA sample submission form', 'Setting']
+  HEADER FIELDS (9):
+       A8  Date:
+       A9  Name:
+       E9  Group:
+      A10  Institute:
+      E10  Email:
+      A11  Phone:
+      E11  Quote number:
+      A12  Technion budget number:
+      A16  Do you require DNA extraction?
+  CHOICE FIELDS (0):
+  PER-SAMPLE DROPDOWNS: 98 cells <- ['', '"Nanodrop, Qubit"', '"Yes, No"']
+  SAMPLE COLUMNS (row 18): ['Sample ID', 'Sample name', 'ng/ul', 'ng/ul method', '260/280', '260/230']
+  SETTING COLUMNS: ['YesNo', 'LibraryPrep', 'Instrument', 'Miseq', 'Nextseq', 'RunMode', 'RunType', 'Conc type']
+==============================================================================
+ChIP-seq_Cut&Run-electronic_2025.xlsx
+  title : DNA Sample Information for ChIP-seq/Cut&Run
+  sheets: ['DNA sample submission form', 'Setting']
+  HEADER FIELDS (14):
+       A8  Date:
+       A9  Name:
+       E9  Group:
+      A10  Institute:
+      E10  Email:
+      A11  Phone:
+      E11  Quote number:
+      A12  Basesapce account:
+      E12  Technion budget number:
+      A16  Select insturment:
+      A20  Run mode:
+      D20  Please specify read length:
+      D22  If selected Other, please specify:
+      A26  Do you require bioinformatic analysis?
+  CHOICE FIELDS (21):
+      A16                                                       <- 
+      C16  Select insturment:                                   <- 
+      A17                                                       <- 
+      B17                                                       <- 
+      C17                                                       <- 
+      D17                                                       <- 
+      E17                                                       <- 
+      F17                                                       <- 
+      A18                                                       <- 
+      B18  Select flow cell                                     <- 
+      B20  Run mode:                                            <- RunMode
+      E20  Please specify read length:                          <- 
+      B22  Select numer of flow cells                           <- Run
+      D24  For Amplicon-seq, please specify %PhiX required-     <- 
+      D26  Do you require bioinformatic analysis?               <- YesNo
+      A27                                                       <- 
+      B27                                                       <- 
+      C27                                                       <- 
+      D27                                                       <- 
+      E27                                                       <- 
+      F27                                                       <- 
+  PER-SAMPLE DROPDOWNS: 66 cells <- ['"ChIP, Cut&Run"', '"Qubit, Nanodrop, Other"']
+  SAMPLE COLUMNS (row 9): ['Sample ID', 'Sample name', 'ng/ul', 'Quant. Method', 'Sample Type', 'Species', 'Remarks']
+  SETTING COLUMNS: ['YesNo', 'LibraryPrep', 'Instrument', 'Miseq', 'Nextseq', 'RunMode', 'RunType', 'Conc type']
+==============================================================================
+Extraction sample submission-electronic_2025.xlsx
+  title : Extraction Sample Information
+  sheets: ['Extraction sample submission', 'Setting']
+  HEADER FIELDS (18):
+       A8  Date:
+       A9  Name:
+       E9  Group:
+      A10  Institute:
+      E10  Email:
+      A11  Phone:
+      E11  Quote number:
+      A12  Basesapce account:
+      E12  Technion budget number:
+      D15  If selected Other, please specify:
+      D19  If selected Other, please specify:
+      A21  Do you require QC (Tapestation)?
+      A23  If NGS was chosen as subsequent application, please fill out the details below:
+      A24  Select insturment:
+      A27  Run mode:
+      D27  Please specify read length:
+      D29  If selected Other, please specify:
+      A31  Do you require bioinformatic analysis?
+  CHOICE FIELDS (11):
+      B15  Starting material                                    <- Starting_material
+      B17  Extraction type                                      <- "DNA,RNA"
+      B19  Subsequent application                               <- SubApplication
+      B20                                                       <- SubApplication
+      B21  Do you require QC (Tapestation)?                     <- "Yes- all samples, Yes- partial, No"
+      B25  Select flow cell                                     <- INDIRECT(B24)
+      B27  Run mode:                                            <- RunMode
+      E27  Please specify read length:                          <- 
+      B29  Select numer of flow cells                           <- Run
+      C31  Do you require bioinformatic analysis?               <- YesNo
+      D33                                                       <- YesNo
+  SAMPLE COLUMNS (row 9): ['Sample ID', 'Sample name', '# cells / tissue weight', 'Species', 'Remarks*']
+  SETTING COLUMNS: ['YesNo', 'StartingMaterial', 'SubApplication', 'LibraryPrep', 'Instrument', 'Miseq', 'Nextseq', 'RunMode', 'RunType', 'Conc type']
+==============================================================================
+DNA-RNA_Quality_&_Quantity-electronic_2025.xlsx
+  title : DNA/RNA Quality and Quantity Submission Form
+  sheets: ['RNA DNA QC submission form', 'Setting']
+  HEADER FIELDS (10):
+       A8  Date:
+       A9  Name:
+       E9  Group:
+      A10  Institute:
+      E10  Email:
+      A11  Phone:
+      E11  Quote number:
+      E12  Technion budget number:
+      A15  Please select an instrument:
+      A17  Select kit type preparation:
+  CHOICE FIELDS (0):
+  PER-SAMPLE DROPDOWNS: 6 cells <- ['"Yes,No"', 'INDIRECT(C15)', 'YesNo']
+  SAMPLE COLUMNS (row 20): ['Sample ID', 'Sample name']
+  SETTING COLUMNS: ['Qubit', 'Tapestation']
+==============================================================================
+DNAseq-electronicV2_2025.xlsx
+  title : DNA Sample Information for DNA-seq
+  sheets: ['DNA sample submission form', 'Setting']
+  HEADER FIELDS (14):
+       A8  Date:
+       A9  Name:
+       E9  Group:
+      A10  Institute:
+      E10  Email:
+      A11  Phone:
+      E11  Quote number:
+      A12  Basesapce account:
+      E12  Technion budget number:
+      A16  Select insturment:
+      A20  Run mode:
+      D20  Please specify read length:
+      D22  If selected Other, please specify:
+      A26  Do you require bioinformatic analysis?
+  CHOICE FIELDS (21):
+      A16                                                       <- 
+      C16  Select insturment:                                   <- 
+      A17                                                       <- 
+      B17                                                       <- 
+      C17                                                       <- 
+      D17                                                       <- 
+      E17                                                       <- 
+      F17                                                       <- 
+      A18                                                       <- 
+      B18  Select flow cell                                     <- 
+      B20  Run mode:                                            <- RunMode
+      E20  Please specify read length:                          <- 
+      B22  Select numer of flow cells                           <- Run
+      D24  For Amplicon-seq, please specify %PhiX required-     <- 
+      D26  Do you require bioinformatic analysis?               <- YesNo
+      A27                                                       <- 
+      B27                                                       <- 
+      C27                                                       <- 
+      D27                                                       <- 
+      E27                                                       <- 
+      F27                                                       <- 
+  PER-SAMPLE DROPDOWNS: 33 cells <- ['"Qubit, Nanodrop, Other"']
+  SAMPLE COLUMNS (row 10): ['Sample ID', 'Sample name', 'ng/ul', 'Quant. Method', '260/280', '260/230', 'Species', 'Remarks']
+  SETTING COLUMNS: ['YesNo', 'LibraryPrep', 'Instrument', 'Miseq', 'Nextseq', 'RunMode', 'RunType', 'Conc type']
+==============================================================================
+Exome-seq-electronicV2_2025.xlsx
+  title : DNA Sample Information for Exome-seq
+  sheets: ['DNA sample submission form', 'Setting']
+  HEADER FIELDS (14):
+       A8  Date:
+       A9  Name:
+       E9  Group:
+      A10  Institute:
+      E10  Email:
+      A11  Phone:
+      E11  Quote number:
+      A12  Basesapce account:
+      E12  Technion budget number:
+      A16  Select insturment:
+      A20  Run mode:
+      D20  Please specify read length:
+      D22  If selected Other, please specify:
+      A26  Do you require bioinformatic analysis?
+  CHOICE FIELDS (21):
+      A16                                                       <- 
+      C16  Select insturment:                                   <- 
+      A17                                                       <- 
+      B17                                                       <- 
+      C17                                                       <- 
+      D17                                                       <- 
+      E17                                                       <- 
+      F17                                                       <- 
+      A18                                                       <- 
+      B18  Select flow cell                                     <- 
+      B20  Run mode:                                            <- RunMode
+      E20  Please specify read length:                          <- 
+      B22  Select numer of flow cells                           <- Run
+      D24  For Amplicon-seq, please specify %PhiX required-     <- 
+      D26  Do you require bioinformatic analysis?               <- YesNo
+      A27                                                       <- 
+      B27                                                       <- 
+      C27                                                       <- 
+      D27                                                       <- 
+      E27                                                       <- 
+      F27                                                       <- 
+  PER-SAMPLE DROPDOWNS: 33 cells <- ['"Qubit, Nanodrop, Other"']
+  SAMPLE COLUMNS (row 10): ['Sample ID', 'Sample name', 'ng/ul', 'Quant. Method', '260/280', '260/230', 'Species', 'Remarks']
+  SETTING COLUMNS: ['YesNo', 'LibraryPrep', 'Instrument', 'Miseq', 'Nextseq', 'RunMode', 'RunType', 'Conc type']
+==============================================================================
+Oxford Nanopore-electronic_2025.xlsx
+  title : Oxford Nanopore Sample Information for DNA-seq
+  sheets: ['DNA sample submission form', 'Setting']
+  HEADER FIELDS (11):
+       A8  Date:
+       A9  Name:
+       E9  Group:
+      A10  Institute:
+      E10  Email:
+      A11  Phone:
+      E11  Quote number:
+      E12  Technion account number:
+      A16  What is your samle type?
+      A19  to preform such enrichment or include all fragments in your samples?
+      A21  Do you require bioinformatic analysis?
+  CHOICE FIELDS (86):
+      A15                                                       <- 
+      B15                                                       <- 
+      C15                                                       <- 
+      D15                                                       <- 
+      E15                                                       <- 
+      F15                                                       <- 
+      A16                                                       <- 
+      B16  What is your samle type?                             <- 
+      A17                                                       <- 
+      B17                                                       <- 
+      C17                                                       <- 
+      D17                                                       <- 
+      E17                                                       <- 
+      F17                                                       <- 
+      A18                                                       <- 
+      B18  Standard Nanopore library prep protocol performs enr <- 
+      A19                                                       <- 
+      B19  to preform such enrichment or include all fragments  <- 
+      A20                                                       <- 
+      B20                                                       <- 
+      C20                                                       <- 
+      D20                                                       <- 
+      E20                                                       <- 
+      F20                                                       <- 
+      A21                                                       <- 
+      B21  Do you require bioinformatic analysis?               <- 
+      A22                                                       <- 
+      B22                                                       <- 
+      C22                                                       <- 
+      D22                                                       <- 
+      E22                                                       <- 
+      F22                                                       <- 
+      A23                                                       <- 
+      B23                                                       <- 
+      C23                                                       <- 
+      D23                                                       <- 
+      E23                                                       <- 
+      F23                                                       <- 
+      A24                                                       <- 
+      B24                                                       <- 
+      C24                                                       <- 
+      D24                                                       <- 
+      E24                                                       <- 
+      F24                                                       <- 
+      A25                                                       <- 
+      B25                                                       <- 
+      C25                                                       <- 
+      D25                                                       <- 
+      E25                                                       <- 
+      F25                                                       <- 
+      A26                                                       <- 
+      B26                                                       <- 
+      C26                                                       <- 
+      D26                                                       <- 
+      E26                                                       <- 
+      F26                                                       <- 
+      A27                                                       <- 
+      B27                                                       <- 
+      C27                                                       <- 
+      D27                                                       <- 
+      E27                                                       <- 
+      F27                                                       <- 
+      A28                                                       <- 
+      B28                                                       <- 
+      C28                                                       <- 
+      D28                                                       <- 
+      E28                                                       <- 
+      F28                                                       <- 
+      A29                                                       <- 
+      B29                                                       <- 
+      C29                                                       <- 
+      D29                                                       <- 
+      E29                                                       <- 
+      F29                                                       <- 
+      A30                                                       <- 
+      B30                                                       <- 
+      C30                                                       <- 
+      D30                                                       <- 
+      E30                                                       <- 
+      F30                                                       <- 
+      A31                                                       <- 
+      B31                                                       <- 
+      C31                                                       <- 
+      D31                                                       <- 
+      E31                                                       <- 
+      F31                                                       <- 
+  PER-SAMPLE DROPDOWNS: 1 cells <- ['']
+  SAMPLE COLUMNS (row 10): ['Sample ID', 'Sample name', 'ng/ul', 'Quant. Method', '260/280', '260/230', 'Amplicon size*', 'Species']
+  SETTING COLUMNS: ['YesNo', 'LibraryPrep', 'Instrument', 'Miseq', 'Nextseq', 'RunMode', 'RunType', 'Conc type']
+==============================================================================
+Metagenomics-electronicV2_2025.xlsx
+  title : DNA Sample Information for 16S-seq
+  sheets: ['DNA sample submission form', 'Setting']
+  HEADER FIELDS (14):
+       A8  Date:
+       A9  Name:
+       E9  Group:
+      A10  Institute:
+      E10  Email:
+      A11  Phone:
+      E11  Quote number:
+      A12  Basesapce account:
+      E12  Technion budget number:
+      A16  Select insturment:
+      A20  Run mode:
+      D20  Please specify read length:
+      D22  If selected Other, please specify:
+      A26  Do you require bioinformatic analysis?
+  CHOICE FIELDS (21):
+      A16                                                       <- 
+      C16  Select insturment:                                   <- 
+      A17                                                       <- 
+      B17                                                       <- 
+      C17                                                       <- 
+      D17                                                       <- 
+      E17                                                       <- 
+      F17                                                       <- 
+      A18                                                       <- 
+      B18  Select flow cell                                     <- 
+      B20  Run mode:                                            <- RunMode
+      E20  Please specify read length:                          <- 
+      B22  Select numer of flow cells                           <- Run
+      D24  For Amplicon-seq, please specify %PhiX required-     <- 
+      D26  Do you require bioinformatic analysis?               <- YesNo
+      A27                                                       <- 
+      B27                                                       <- 
+      C27                                                       <- 
+      D27                                                       <- 
+      E27                                                       <- 
+      F27                                                       <- 
+  PER-SAMPLE DROPDOWNS: 66 cells <- ['"16S- V4, 16S- V3V4, 18S"', '"Qubit, Nanodrop, Other"']
+  SAMPLE COLUMNS (row 10): ['Sample ID', 'Sample name', 'ng/ul', 'Quant. Method', 'Library Type', 'Remarks']
+  SETTING COLUMNS: ['YesNo', 'LibraryPrep', 'Instrument', 'Miseq', 'Nextseq', 'RunMode', 'RunType', 'Conc type']
+==============================================================================
+Metagenomics-extraction-electronicV2_2025.xlsx   [NOT BUILT — merged into 16S/18S + shotgun]
+  title : Sample Information for 16S-seq (w/extraction)
+  sheets: ['DNA sample submission form', 'Setting']
+  HEADER FIELDS (14):
+       A8  Date:
+       A9  Name:
+       E9  Group:
+      A10  Institute:
+      E10  Email:
+      A11  Phone:
+      E11  Quote number:
+      A12  Basesapce account:
+      E12  Technion budget number:
+      A16  Select insturment:
+      A20  Run mode:
+      D20  Please specify read length:
+      D22  If selected Other, please specify:
+      A26  Do you require bioinformatic analysis?
+  CHOICE FIELDS (21):
+      A16                                                       <- 
+      C16  Select insturment:                                   <- 
+      A17                                                       <- 
+      B17                                                       <- 
+      C17                                                       <- 
+      D17                                                       <- 
+      E17                                                       <- 
+      F17                                                       <- 
+      A18                                                       <- 
+      B18  Select flow cell                                     <- 
+      B20  Run mode:                                            <- RunMode
+      E20  Please specify read length:                          <- 
+      B22  Select numer of flow cells                           <- Run
+      D24  For Amplicon-seq, please specify %PhiX required-     <- 
+      D26  Do you require bioinformatic analysis?               <- YesNo
+      A27                                                       <- 
+      B27                                                       <- 
+      C27                                                       <- 
+      D27                                                       <- 
+      E27                                                       <- 
+      F27                                                       <- 
+  PER-SAMPLE DROPDOWNS: 33 cells <- ['"16S- V4, 16S- V3V4, 18S"']
+  SAMPLE COLUMNS (row 10): ['Sample ID', 'Sample name', '# cells / tissue weight [mg]', 'Library Type', 'Experimental group*', 'Remarks']
+  SETTING COLUMNS: ['YesNo', 'LibraryPrep', 'Instrument', 'Miseq', 'Nextseq', 'RunMode', 'RunType', 'Conc type']
+==============================================================================
+Infinium-methylation-electronic_2025.xlsx
+  title : DNA Sample Information for Infinium Methylation
+  sheets: ['DNA sample submission form', 'Setting']
+  HEADER FIELDS (9):
+       A8  Date:
+       H8  DNA extraction method/kit:
+       A9  Name:
+       E9  Group:
+      A10  Institute:
+      E10  Email:
+      A11  Phone:
+      E11  Quote number:
+      A12  Technion account number:
+  CHOICE FIELDS (9):
+      B16                                                       <- LibraryPrep
+      B22                                                       <- INDIRECT(B20)
+      C22                                                       <- 
+      B24                                                       <- RunMode
+      E24                                                       <- 
+      F24                                                       <- 
+      B26                                                       <- Run
+      D28                                                       <- 
+      D30                                                       <- YesNo
+  PER-SAMPLE DROPDOWNS: 24 cells <- ['"Qubit, Nanodrop, Picogreen"']
+  SAMPLE COLUMNS (row 10): ['Sample ID', 'Sample name', 'ng/ul', 'Quant. method', '260/280', '260/230', 'Species']
+  SETTING COLUMNS: ['YesNo', 'LibraryPrep', 'Instrument', 'Miseq', 'Nextseq', 'RunMode', 'RunType', 'Conc type']
+==============================================================================
+RRBS-electronic_2025.xlsx
+  title : DNA Sample Information for RRBS-seq
+  sheets: ['DNA sample submission form', 'Setting']
+  HEADER FIELDS (13):
+       A8  Date:
+       A9  Name:
+       E9  Group:
+      A10  Institute:
+      E10  Email:
+      A11  Phone:
+      E11  Quote number:
+      A12  Basesapce account:
+      E12  Technion account number:
+      A19  Run mode:
+      D19  Please specify read length:
+      D21  If selected Other, please specify:
+      A25  Do you require bioinformatic analysis?
+  CHOICE FIELDS (61):
+      A16                                                       <- 
+      B16                                                       <- 
+      C16                                                       <- 
+      D16                                                       <- 
+      E16                                                       <- 
+      F16                                                       <- 
+      A17                                                       <- 
+      B17  Select flow cell                                     <- 
+      B19  Run mode:                                            <- RunMode
+      E19  Please specify read length:                          <- 
+      B21  Select numer of flow cells                           <- Run
+      D23                                                       <- 
+      D25  Do you require bioinformatic analysis?               <- YesNo
+      A26                                                       <- 
+      B26                                                       <- 
+      C26                                                       <- 
+      D26                                                       <- 
+      E26                                                       <- 
+      F26                                                       <- 
+      A27                                                       <- 
+      B27                                                       <- 
+      C27                                                       <- 
+      D27                                                       <- 
+      E27                                                       <- 
+      F27                                                       <- 
+      A28                                                       <- 
+      B28                                                       <- 
+      C28                                                       <- 
+      D28                                                       <- 
+      E28                                                       <- 
+      F28                                                       <- 
+      A29                                                       <- 
+      B29                                                       <- 
+      C29                                                       <- 
+      D29                                                       <- 
+      E29                                                       <- 
+      F29                                                       <- 
+      A30                                                       <- 
+      B30                                                       <- 
+      C30                                                       <- 
+      D30                                                       <- 
+      E30                                                       <- 
+      F30                                                       <- 
+      A31                                                       <- 
+      B31                                                       <- 
+      C31                                                       <- 
+      D31                                                       <- 
+      E31                                                       <- 
+      F31                                                       <- 
+      A32                                                       <- 
+      B32                                                       <- 
+      C32                                                       <- 
+      D32                                                       <- 
+      E32                                                       <- 
+      F32                                                       <- 
+      A33                                                       <- 
+      B33                                                       <- 
+      C33                                                       <- 
+      D33                                                       <- 
+      E33                                                       <- 
+      F33                                                       <- 
+  PER-SAMPLE DROPDOWNS: 33 cells <- ['"Nanodrop, Qubit, Tapestation, Other"']
+  SAMPLE COLUMNS (row 10): ['Sample ID', 'Sample name', 'ng/ul', 'Quant. Method', '260/280', '260/230', 'Species', 'Remarks']
+  SETTING COLUMNS: ['YesNo', 'LibraryPrep', 'Instrument', 'Miseq', 'Nextseq', 'RunMode', 'RunType', 'Conc type']
+==============================================================================
+Olink_reveal-electronicV2_2025.xlsx
+  title : Sample Information for Olink Reveal
+  sheets: ['DNA sample submission form', 'Setting']
+  HEADER FIELDS (10):
+       A8  Date:
+       A9  Name:
+       E9  Group:
+      A10  Institute:
+      E10  Email:
+      A11  Phone:
+      E11  Quote number:
+      A12  Basesapce account:
+      E12  Technion budget number:
+      A16  Do you require bioinformatic analysis?
+  CHOICE FIELDS (25):
+      A16                                                       <- 
+      C16  Do you require bioinformatic analysis?               <- 
+      A17                                                       <- 
+      B17                                                       <- 
+      C17                                                       <- 
+      D17                                                       <- 
+      E17                                                       <- 
+      F17                                                       <- 
+      A18                                                       <- 
+      B18                                                       <- INDIRECT(#REF!)
+      C18                                                       <- 
+      D18                                                       <- 
+      E18                                                       <- 
+      F18                                                       <- 
+      B20                                                       <- RunMode
+      E20                                                       <- 
+      F20                                                       <- 
+      B22                                                       <- Run
+      D24                                                       <- 
+      A27                                                       <- 
+      B27                                                       <- 
+      C27                                                       <- 
+      D27                                                       <- 
+      E27                                                       <- 
+      F27                                                       <- 
+  SAMPLE COLUMNS (row 9): ['Sample ID', 'Well ID', 'Sample name', 'Sample Type', 'Sample Type- other', 'Remarks']
+  SETTING COLUMNS: ['YesNo', 'Conc type']
+==============================================================================
+RNAseq-electronic 2025.xlsx
+  title : RNA Sample Information for RNA-seq
+  sheets: ['RNA sample submission form', 'Setting']
+  HEADER FIELDS (18):
+       A8  Date:
+       H8  RNA extraction method/kit:
+       A9  Name:
+       E9  Group:
+      A10  Institute:
+      E10  Email:
+      A11  Phone:
+      E11  Quote number:
+      A12  Basesapce account:
+      E12  Technion account number:
+      A15  Do you require RNA QC?
+      A17  Select library preparation:
+      A19  If selected Other, please specify:
+      A21  Select insturment:
+      A25  Run mode:
+      D25  Please specify read length:
+      D27  If selected Other, please specify:
+      A30  Do you require bioinformatic analysis?
+  CHOICE FIELDS (8):
+      B15  Do you require RNA QC?                               <- YesNo
+      B17  Select library preparation:                          <- LibraryPrep
+      C23  Select flow cell                                     <- INDIRECT(B21)
+      B25  Run mode:                                            <- RunMode
+      F25  Please specify read length:                          <- 
+      B27  Select numer of flow cells                           <- Run
+      D30  Do you require bioinformatic analysis?               <- YesNo
+      D31                                                       <- YesNo
+  SAMPLE COLUMNS (row 10): ['Sample ID', 'Sample name', 'ng/ul', 'Quant. Method', 'RIN', '260/280', '260/230', 'Species']
+  SETTING COLUMNS: ['YesNo', 'LibraryPrep', 'Instrument', 'Miseq', 'Nextseq', 'RunMode', 'RunType', 'Conc type']
+==============================================================================
+RNAseq-extraction-electronic 2025.xlsx   [NOT BUILT — merged into RNA-seq]
+  title : Sample Information for RNA-seq (w/ extraction)
+  sheets: ['RNA sample submission form', 'Setting']
+  HEADER FIELDS (16):
+       A8  Date:
+       A9  Name:
+       E9  Group:
+      A10  Institute:
+      E10  Email:
+      A11  Phone:
+      E11  Quote number:
+      A12  Basesapce account:
+      E12  Technion account number:
+      A17  Select library preparation:
+      A19  If selected Other, please specify:
+      A21  Select insturment:
+      A25  Run mode:
+      D25  Please specify read length:
+      D27  If selected Other, please specify:
+      A30  Do you require bioinformatic analysis?
+  CHOICE FIELDS (8):
+      B15                                                       <- YesNo
+      B17  Select library preparation:                          <- LibraryPrep
+      C23  Select flow cell                                     <- INDIRECT(B21)
+      B25  Run mode:                                            <- RunMode
+      F25  Please specify read length:                          <- 
+      B27  Select numer of flow cells                           <- Run
+      D30  Do you require bioinformatic analysis?               <- YesNo
+      D31                                                       <- YesNo
+  SAMPLE COLUMNS (row 10): ['Sample ID', 'Sample name', '# cells / tissue weight', 'Species', 'Experiment group', 'Remarks']
+  SETTING COLUMNS: ['YesNo', 'LibraryPrep', 'Instrument', 'Miseq', 'Nextseq', 'RunMode', 'RunType', 'Conc type']
+==============================================================================
+User-prepared-electronicV2_2025.xlsx
+  title : User-Prepared Library Information
+  sheets: ['Read to seq sample submission', 'Setting']
+  HEADER FIELDS (14):
+       A8  Date:
+       A9  Name:
+       E9  Group:
+      A10  Institute:
+      E10  Email:
+      A11  Phone:
+      E11  Quote number:
+      A12  Basesapce account:
+      E12  Technion account number:
+      A16  Select insturment:
+      A20  Run mode:
+      D20  Please specify read length:
+      D22  If selected Other, please specify:
+      A26  Do you require bioinformatic analysis?
+  CHOICE FIELDS (21):
+      A16                                                       <- 
+      C16  Select insturment:                                   <- 
+      A17                                                       <- 
+      B17                                                       <- 
+      C17                                                       <- 
+      D17                                                       <- 
+      E17                                                       <- 
+      F17                                                       <- 
+      A18                                                       <- 
+      B18  Select flow cell                                     <- 
+      B20  Run mode:                                            <- RunMode
+      E20  Please specify read length:                          <- 
+      B22  Select numer of flow cells                           <- Run
+      D24  For Amplicon-seq, please specify %PhiX required-     <- 
+      D26  Do you require bioinformatic analysis?               <- YesNo
+      A27                                                       <- 
+      B27                                                       <- 
+      C27                                                       <- 
+      D27                                                       <- 
+      E27                                                       <- 
+      F27                                                       <- 
+  PER-SAMPLE DROPDOWNS: 1 cells <- ['']
+  SAMPLE COLUMNS (row 14): ['Sample ID', 'Sample name', 'Index 1 seq', 'Index 2 seq*']
+  SETTING COLUMNS: ['YesNo', 'LibraryPrep', 'Instrument', 'Miseq', 'Nextseq', 'RunMode', 'RunType', 'Conc type']
+==============================================================================
+miRNAseq-electronic 2025.xlsx
+  title : RNA Sample Information for miRNA-seq
+  sheets: ['RNA sample submission form', 'Setting']
+  HEADER FIELDS (18):
+       A8  Date:
+       H8  RNA extraction method/kit:
+       A9  Name:
+       E9  Group:
+      A10  Institute:
+      E10  Email:
+      A11  Phone:
+      E11  Quote number:
+      A12  Basesapce account:
+      E12  Technion badget number:
+      A15  Do you require RNA QC?
+      A17  Select library preparation:
+      A19  If selected Other, please specify:
+      A21  Select insturment:
+      A25  Run mode:
+      D25  Please specify read length:
+      D27  If selected Other, please specify:
+      A30  Do you require bioinformatic analysis?
+  CHOICE FIELDS (8):
+      B15  Do you require RNA QC?                               <- YesNo
+      B17  Select library preparation:                          <- LibraryPrep
+      C23  Select flow cell                                     <- INDIRECT(B21)
+      B25  Run mode:                                            <- RunMode
+      F25  Please specify read length:                          <- 
+      B27  Select numer of flow cells                           <- Run
+      D30  Do you require bioinformatic analysis?               <- YesNo
+      D31                                                       <- YesNo
+  SAMPLE COLUMNS (row 10): ['Sample ID', 'Sample name', 'ng/ul', 'Quant. Method', 'RIN', '260/280', '260/230', 'Species']
+  SETTING COLUMNS: ['YesNo', 'LibraryPrep', 'Instrument', 'Miseq', 'Nextseq', 'RunMode', 'RunType', 'Conc type']
+==============================================================================
+sc10X-electronic_2025.xlsx
+  title : Sample Information for 10X scRNA-seq
+  sheets: ['10X scRNA  submission form', 'Setting']
+  HEADER FIELDS (14):
+       A8  Date:
+       A9  Name:
+       D9  Group:
+       H9  Was FACS sorting used on the samples?
+      A10  Institute:
+      D10  Email:
+      A11  Phone:
+      D11  Quote number:
+      A12  Basesapce account:
+      D12  Technion account number:
+      A17  Select library preparation:
+      A20  Select NS2000 flow cell:
+      A23  Do you require CellRanger analysis?
+      A25  Do you require full scRNAseq bioinformatic analysis?
+  CHOICE FIELDS (5):
+      B15                                                       <- YesNo
+      E17  Select library preparation:                          <- 
+      E23  Do you require CellRanger analysis?                  <- YesNo
+      E25  Do you require full scRNAseq bioinformatic analysis? <- YesNo
+      D26                                                       <- YesNo
+  PER-SAMPLE DROPDOWNS: 28 cells <- ['', 'YesNo']
+  SAMPLE COLUMNS (row 11): ['Sample ID', 'Sample name', 'Fresh: cells/ul ; Fixed: total #cells', '% viability', '#caputred cells*']
+  SETTING COLUMNS: ['YesNo', 'LibraryPrep', 'Nextseq', 'RunMode', 'RunType']
+==============================================================================
+Spatial-electronic_2025.xlsx
+  title : Sample Information for Spatial Transcriptomics
+  sheets: ['10X scRNA  submission form', 'Setting']
+  HEADER FIELDS (13):
+       A8  Date:
+       A9  Name:
+       D9  Group:
+      A10  Institute:
+      D10  Email:
+      A11  Phone:
+      D11  Quote number:
+      A12  Basesapce account:
+      D12  Technion account number:
+      A17  Select library preparation:
+      A21  Select NS2000 flow cell:
+      A24  Do you require SpcaeRanger analysis?
+      A26  Do you require full spatial bioinformatic analysis?
+  CHOICE FIELDS (8):
+      B15                                                       <- YesNo
+      E17  Select library preparation:                          <- 
+      E18                                                       <- 
+      B19  Organism                                             <- "Human, Mouse"
+      C19  Human                                                <- "Human, Mouse"
+      E24  Do you require SpcaeRanger analysis?                 <- YesNo
+      E26  Do you require full spatial bioinformatic analysis?  <- YesNo
+      D27                                                       <- YesNo
+  PER-SAMPLE DROPDOWNS: 18 cells <- ['']
+  SAMPLE COLUMNS (row 10): ['Sample ID', 'Sample name', 'Description', 'Block number', 'Slide number']
+  SETTING COLUMNS: ['YesNo', 'LibraryPrep', 'Nextseq', 'RunMode', 'RunType', 'Conc type']
+
+==============================================================================
+SAMPLE-COLUMN MATRIX
+==============================================================================
+  Sample ID                        20  Amplicon-seq, CELseq, CLA, ChIP-seq_Cut&Run, Extraction sample subm, DNA-RNA_Quality_&_Quan, DNAseq, Exome-seq, Oxford Nanopore, Metagenomics, Metagenomics-extractio, Infinium-methylation, RRBS, Olink_reveal, RNAseq, RNAseq-extraction, User-prepared, miRNAseq, sc10X, Spatial
+  Sample name                      20  Amplicon-seq, CELseq, CLA, ChIP-seq_Cut&Run, Extraction sample subm, DNA-RNA_Quality_&_Quan, DNAseq, Exome-seq, Oxford Nanopore, Metagenomics, Metagenomics-extractio, Infinium-methylation, RRBS, Olink_reveal, RNAseq, RNAseq-extraction, User-prepared, miRNAseq, sc10X, Spatial
+  Amplicon size*                    2  Amplicon-seq, Oxford Nanopore
+  Species                          12  Amplicon-seq, CELseq, ChIP-seq_Cut&Run, Extraction sample subm, DNAseq, Exome-seq, Oxford Nanopore, Infinium-methylation, RRBS, RNAseq, RNAseq-extraction, miRNAseq
+  Remarks                           9  Amplicon-seq, ChIP-seq_Cut&Run, DNAseq, Exome-seq, Metagenomics, Metagenomics-extractio, RRBS, Olink_reveal, RNAseq-extraction
+  ng/ul                            11  CELseq, CLA, ChIP-seq_Cut&Run, DNAseq, Exome-seq, Oxford Nanopore, Metagenomics, Infinium-methylation, RRBS, RNAseq, miRNAseq
+  Quant. Method                     9  CELseq, ChIP-seq_Cut&Run, DNAseq, Exome-seq, Oxford Nanopore, Metagenomics, RRBS, RNAseq, miRNAseq
+  RIN                               3  CELseq, RNAseq, miRNAseq
+  260/280                           9  CELseq, CLA, DNAseq, Exome-seq, Oxford Nanopore, Infinium-methylation, RRBS, RNAseq, miRNAseq
+  260/230                           9  CELseq, CLA, DNAseq, Exome-seq, Oxford Nanopore, Infinium-methylation, RRBS, RNAseq, miRNAseq
+  ng/ul method                      1  CLA
+  Sample Type                       2  ChIP-seq_Cut&Run, Olink_reveal
+  # cells / tissue weight           2  Extraction sample subm, RNAseq-extraction
+  Remarks*                          1  Extraction sample subm
+  Library Type                      2  Metagenomics, Metagenomics-extractio
+  # cells / tissue weight [mg]      1  Metagenomics-extractio
+  Experimental group*               1  Metagenomics-extractio
+  Quant. method                     1  Infinium-methylation
+  Well ID                           1  Olink_reveal
+  Sample Type- other                1  Olink_reveal
+  Experiment group                  1  RNAseq-extraction
+  Index 1 seq                       1  User-prepared
+  Index 2 seq*                      1  User-prepared
+  Fresh: cells/ul ; Fixed: total #cells  1  sc10X
+  % viability                       1  sc10X
+  #caputred cells*                  1  sc10X
+  Description                       1  Spatial
+  Block number                      1  Spatial
+  Slide number                      1  Spatial
+
+==============================================================================
+CHOICE-FIELD MATRIX
+==============================================================================
+  Select insturment:                              7  Amplicon-seq, ChIP-seq_Cut&Run, DNAseq, Exome-seq, Metagenomics, Metagenomics-extractio, User-prepared
+  Select flow cell                               13  Amplicon-seq, CELseq, ChIP-seq_Cut&Run, Extraction sample subm, DNAseq, Exome-seq, Metagenomics, Metagenomics-extractio, RRBS, RNAseq, RNAseq-extraction, User-prepared, miRNAseq
+  Run mode:                                      13  Amplicon-seq, CELseq, ChIP-seq_Cut&Run, Extraction sample subm, DNAseq, Exome-seq, Metagenomics, Metagenomics-extractio, RRBS, RNAseq, RNAseq-extraction, User-prepared, miRNAseq
+  Please specify read length:                    13  Amplicon-seq, CELseq, ChIP-seq_Cut&Run, Extraction sample subm, DNAseq, Exome-seq, Metagenomics, Metagenomics-extractio, RRBS, RNAseq, RNAseq-extraction, User-prepared, miRNAseq
+  Select numer of flow cells                     13  Amplicon-seq, CELseq, ChIP-seq_Cut&Run, Extraction sample subm, DNAseq, Exome-seq, Metagenomics, Metagenomics-extractio, RRBS, RNAseq, RNAseq-extraction, User-prepared, miRNAseq
+  For Amplicon-seq, please specify %PhiX require  7  Amplicon-seq, ChIP-seq_Cut&Run, DNAseq, Exome-seq, Metagenomics, Metagenomics-extractio, User-prepared
+  Do you require bioinformatic analysis?         15  Amplicon-seq, CELseq, ChIP-seq_Cut&Run, Extraction sample subm, DNAseq, Exome-seq, Oxford Nanopore, Metagenomics, Metagenomics-extractio, RRBS, Olink_reveal, RNAseq, RNAseq-extraction, User-prepared, miRNAseq
+  Do you require RNA QC?                          3  CELseq, RNAseq, miRNAseq
+  Select library preparation:                     6  CELseq, RNAseq, RNAseq-extraction, miRNAseq, sc10X, Spatial
+  Starting material                               1  Extraction sample subm
+  Extraction type                                 1  Extraction sample subm
+  Subsequent application                          1  Extraction sample subm
+  Do you require QC (Tapestation)?                1  Extraction sample subm
+  What is your samle type?                        1  Oxford Nanopore
+  Standard Nanopore library prep protocol perfor  1  Oxford Nanopore
+  to preform such enrichment or include all frag  1  Oxford Nanopore
+  Do you require CellRanger analysis?             1  sc10X
+  Do you require full scRNAseq bioinformatic ana  1  sc10X
+  Organism                                        1  Spatial
+  Human                                           1  Spatial
+  Do you require SpcaeRanger analysis?            1  Spatial
+  Do you require full spatial bioinformatic anal  1  Spatial
+
+==============================================================================
+SETTING COLUMNS PER WORKBOOK
+==============================================================================
+  Amplicon-seq-electronic_2025.xlsx            ['YesNo', 'LibraryPrep', 'Instrument', 'Miseq', 'Nextseq', 'RunMode', 'RunType', 'Conc type']
+  CELseq-electronic 2025.xlsx                  ['YesNo', 'LibraryPrep', 'Instrument', 'Miseq', 'Nextseq', 'RunMode', 'RunType', 'Conc type']
+  CLA-electronic_2025.xlsx                     ['YesNo', 'LibraryPrep', 'Instrument', 'Miseq', 'Nextseq', 'RunMode', 'RunType', 'Conc type']
+  ChIP-seq_Cut&Run-electronic_2025.xlsx        ['YesNo', 'LibraryPrep', 'Instrument', 'Miseq', 'Nextseq', 'RunMode', 'RunType', 'Conc type']
+  Extraction sample submission-electronic_2025 ['YesNo', 'StartingMaterial', 'SubApplication', 'LibraryPrep', 'Instrument', 'Miseq', 'Nextseq', 'RunMode', 'RunType', 'Conc type']
+  DNA-RNA_Quality_&_Quantity-electronic_2025.x ['Qubit', 'Tapestation']
+  DNAseq-electronicV2_2025.xlsx                ['YesNo', 'LibraryPrep', 'Instrument', 'Miseq', 'Nextseq', 'RunMode', 'RunType', 'Conc type']
+  Exome-seq-electronicV2_2025.xlsx             ['YesNo', 'LibraryPrep', 'Instrument', 'Miseq', 'Nextseq', 'RunMode', 'RunType', 'Conc type']
+  Oxford Nanopore-electronic_2025.xlsx         ['YesNo', 'LibraryPrep', 'Instrument', 'Miseq', 'Nextseq', 'RunMode', 'RunType', 'Conc type']
+  Metagenomics-electronicV2_2025.xlsx          ['YesNo', 'LibraryPrep', 'Instrument', 'Miseq', 'Nextseq', 'RunMode', 'RunType', 'Conc type']
+  Metagenomics-extraction-electronicV2_2025.xl ['YesNo', 'LibraryPrep', 'Instrument', 'Miseq', 'Nextseq', 'RunMode', 'RunType', 'Conc type']
+  Infinium-methylation-electronic_2025.xlsx    ['YesNo', 'LibraryPrep', 'Instrument', 'Miseq', 'Nextseq', 'RunMode', 'RunType', 'Conc type']
+  RRBS-electronic_2025.xlsx                    ['YesNo', 'LibraryPrep', 'Instrument', 'Miseq', 'Nextseq', 'RunMode', 'RunType', 'Conc type']
+  Olink_reveal-electronicV2_2025.xlsx          ['YesNo', 'Conc type']
+  RNAseq-electronic 2025.xlsx                  ['YesNo', 'LibraryPrep', 'Instrument', 'Miseq', 'Nextseq', 'RunMode', 'RunType', 'Conc type']
+  RNAseq-extraction-electronic 2025.xlsx       ['YesNo', 'LibraryPrep', 'Instrument', 'Miseq', 'Nextseq', 'RunMode', 'RunType', 'Conc type']
+  User-prepared-electronicV2_2025.xlsx         ['YesNo', 'LibraryPrep', 'Instrument', 'Miseq', 'Nextseq', 'RunMode', 'RunType', 'Conc type']
+  miRNAseq-electronic 2025.xlsx                ['YesNo', 'LibraryPrep', 'Instrument', 'Miseq', 'Nextseq', 'RunMode', 'RunType', 'Conc type']
+  sc10X-electronic_2025.xlsx                   ['YesNo', 'LibraryPrep', 'Nextseq', 'RunMode', 'RunType']
+  Spatial-electronic_2025.xlsx                 ['YesNo', 'LibraryPrep', 'Nextseq', 'RunMode', 'RunType', 'Conc type']
+
+==============================================================================
+20 workbooks surveyed

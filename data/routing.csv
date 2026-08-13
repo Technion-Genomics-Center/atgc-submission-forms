@@ -1,0 +1,37 @@
+﻿application_slug,application_name,lab,to,cc
+scrna-seq-10x,10X scRNA-seq,Emerson,,
+scrna-seq-10x,10X scRNA-seq,Medicine (Rappaport),linde@technion.ac.il,nitsanf@technion.ac.il
+amplicon-seq,Amplicon-seq,Emerson,angelao@technion.ac.il,nitsanf@technion.ac.il
+amplicon-seq,Amplicon-seq,Medicine (Rappaport),linde@technion.ac.il,nitsanf@technion.ac.il
+cell-line-authentication,Cell-line authentication,Emerson,,
+cell-line-authentication,Cell-line authentication,Medicine (Rappaport),linde@technion.ac.il,nitsanf@technion.ac.il
+chip-seq-cut-and-run,ChIP-seq / Cut&Run,Emerson,linde@technion.ac.il,nitsanf@technion.ac.il
+chip-seq-cut-and-run,ChIP-seq / Cut&Run,Medicine (Rappaport),linde@technion.ac.il,nitsanf@technion.ac.il
+extraction,DNA / RNA extraction,Emerson,linde@technion.ac.il,nitsanf@technion.ac.il
+extraction,DNA / RNA extraction,Medicine (Rappaport),linde@technion.ac.il,nitsanf@technion.ac.il
+dna-seq,DNA-seq,Emerson,linde@technion.ac.il,nitsanf@technion.ac.il
+dna-seq,DNA-seq,Medicine (Rappaport),linde@technion.ac.il,nitsanf@technion.ac.il
+dna-rna-quality-quantity,DNA/RNA quality and quantity,Emerson,angelao@technion.ac.il,nitsanf@technion.ac.il
+dna-rna-quality-quantity,DNA/RNA quality and quantity,Medicine (Rappaport),fdoron@technion.ac.il; gliza@technion.ac.il,nitsanf@technion.ac.il
+exome-seq,Exome-seq,Emerson,linde@technion.ac.il,nitsanf@technion.ac.il
+exome-seq,Exome-seq,Medicine (Rappaport),linde@technion.ac.il,nitsanf@technion.ac.il
+infinium-methylation,Infinium methylation,Emerson,linde@technion.ac.il,nitsanf@technion.ac.il
+infinium-methylation,Infinium methylation,Medicine (Rappaport),linde@technion.ac.il,nitsanf@technion.ac.il
+metagenomics-16s-18s,Metagenomics — 16S / 18S,Emerson,linde@technion.ac.il,nitsanf@technion.ac.il
+metagenomics-16s-18s,Metagenomics — 16S / 18S,Medicine (Rappaport),linde@technion.ac.il,nitsanf@technion.ac.il
+olink-reveal,Olink Reveal,Emerson,,
+olink-reveal,Olink Reveal,Medicine (Rappaport),linde@technion.ac.il,nitsanf@technion.ac.il
+nanopore,Oxford Nanopore,Emerson,linde@technion.ac.il,nitsanf@technion.ac.il
+nanopore,Oxford Nanopore,Medicine (Rappaport),linde@technion.ac.il,nitsanf@technion.ac.il
+rnaseq,RNA-seq,Emerson,linde@technion.ac.il,nitsanf@technion.ac.il
+rnaseq,RNA-seq,Medicine (Rappaport),linde@technion.ac.il,nitsanf@technion.ac.il
+rrbs,RRBS,Emerson,,
+rrbs,RRBS,Medicine (Rappaport),linde@technion.ac.il,nitsanf@technion.ac.il
+shotgun-metagenomics,Shotgun metagenomics,Emerson,linde@technion.ac.il,nitsanf@technion.ac.il
+shotgun-metagenomics,Shotgun metagenomics,Medicine (Rappaport),linde@technion.ac.il,nitsanf@technion.ac.il
+spatial-transcriptomics,Spatial transcriptomics,Emerson,,
+spatial-transcriptomics,Spatial transcriptomics,Medicine (Rappaport),linde@technion.ac.il,nitsanf@technion.ac.il
+user-prepared,User-prepared library sequencing,Emerson,linde@technion.ac.il,nitsanf@technion.ac.il
+user-prepared,User-prepared library sequencing,Medicine (Rappaport),linde@technion.ac.il,nitsanf@technion.ac.il
+mirna-seq,miRNA-seq,Emerson,linde@technion.ac.il,nitsanf@technion.ac.il
+mirna-seq,miRNA-seq,Medicine (Rappaport),linde@technion.ac.il,nitsanf@technion.ac.il
