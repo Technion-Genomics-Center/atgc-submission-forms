@@ -95,7 +95,7 @@ LABS = [
 # doc 05 §11.2 — when extraction is wanted, the researcher is sending material,
 # not measured nucleic acid. Concentration and purity cannot be known yet, so
 # the table asks what is actually in the tube.
-EXTRACTION_COLUMNS = ["Sample name", "# cells / tissue weight [mg]", "Species",
+EXTRACTION_COLUMNS = ["Sample name", "# cells / tissue weight [mg]", "Organism",
                       "Experimental group", "Remarks"]
 
 # A form offering both asks which nucleic acid first: twelve services in one
@@ -230,6 +230,10 @@ APPLICATIONS = [
              label="Do you require primary analysis (SpaceRanger)?",
              catalog="Primary analysis- SpaceRanger",
              only_for_kits=["Visium HD", "Visium HD 3'"]),
+         # Nitsan, 2026-08-13. CosMx is imaged on the instrument; nothing goes
+         # on a flow cell. Visium HD does get sequenced, so the sequencing
+         # questions follow the kit rather than the application.
+         flowcell_only_for_kits=["Visium HD", "Visium HD 3'"],
          # Every CosMx kit can carry custom add-on genes, billed per gene.
          cosmx_addon=dict(
              trigger_prefix="CosMx",
@@ -246,8 +250,13 @@ APPLICATIONS = [
          workbook="Metagenomics/Metagenomics-electronicV2_2025.xlsx",
          root=WEBSITE,
          # doc 05 §4.1 — header multi-select drives the per-sample column.
-         library_types=["16S", "18S"],
+         # Nitsan asked what a mixed project should do. Proposal: the header
+         # states what the submission contains, and "Mixed" hands the decision
+         # to the per-sample Library Type column, which already exists and
+         # already auto-fills. No new UI, and one sample per row stays true.
+         library_types=["16S", "18S", "Mixed — set per sample"],
          regions=["V4", "V3-V4"],
+         sample_library_types=["16S V4", "16S V3-V4", "18S"],
          extraction="dna"),
 
     # doc 05 §4.2 — no workbook exists; built from the DNA-seq layout and
@@ -271,6 +280,7 @@ APPLICATIONS = [
          workbook="Amplicon-seq/Amplicon-seq-electronic_2025.xlsx", root=WEBSITE),
 
     dict(slug="dna-seq", site=SITE + "dna-seq/", name="DNA-seq", status=BUILD, analysis=DNASEQ,
+         extraction="dna",
          workbook="DNA-seqeucning additional files/DNAseq-electronicV2_2025.xlsx",
          root=WEBSITE),
 
@@ -289,16 +299,21 @@ APPLICATIONS = [
          root=WEBSITE),
 
     dict(slug="rrbs", site=SITE + "dna-methylation/", name="RRBS", status=BUILD, analysis=RRBS,
+         extraction="dna",
          workbook="Methylation additional files/RRBS-electronic_2025.xlsx",
          root=WEBSITE),
 
     dict(slug="olink-reveal", site=SITE + "olink_reveal/", name="Olink Reveal", status=BUILD, analysis=OLINK,
          workbook="Olink Reveal/Olink_reveal-electronicV2_2025.xlsx", root=WEBSITE,
          # doc 05 §16.2 — keeps its own plate-based table, no concentration.
-         keep_own_table=True),
+         keep_own_table=True,
+         # Nitsan, 2026-08-13: the free-text "other" column is not used, and
+         # Olink plates are not QC'd here.
+         drop_columns=["Sample Type- other"],
+         no_qc=True),
 
     # The researcher brings a finished library, so there is no prep to choose.
-    dict(slug="user-prepared", no_library_prep=True,
+    dict(slug="user-prepared", no_library_prep=True, no_experimental_group=True,
          # No prep to choose, but the library still gets measured before it
          # goes on a flow cell (Nitsan, 2026-08-12).
          qc_services=["Qubit measurement", "TapeStation"],
@@ -309,10 +324,14 @@ APPLICATIONS = [
 
     # ── forms with the question but no panel, doc 05 §12.2 ──────────────────
     dict(slug="nanopore", site=SITE + "long-read-sequencing/", name="Oxford Nanopore", status=BUILD, analysis=None,
+         # Nanopore has its own flow cells and its own run settings — the
+         # NextSeq questions do not apply. The library prep still does.
+         no_flowcell=True,
          workbook="Long read sequencing additional files/Oxford Nanopore-electronic_2025.xlsx",
          root=WEBSITE),
 
     dict(slug="mirna-seq", site=SITE + "mirna-seq/", name="miRNA-seq", status=BUILD, analysis=None,
+         extraction="rna",
          workbook="miRNA-seq additional files/miRNAseq-electronic 2025.xlsx",
          root=WEBSITE),
 
@@ -375,7 +394,9 @@ APPLICATIONS = [
          # Nothing is sequenced here. The whole service is: extract, and measure
          # what came out. Library prep and flow cell belong to the application
          # that follows, on its own form.
-         no_sequencing=True, extraction="both",
+         # Asking "do you require extraction?" on the extraction form is asking
+         # someone why they are here. It is always yes.
+         no_sequencing=True, extraction="both", extraction_always=True,
          qc_services=["Qubit measurement", "TapeStation"],
          workbook="DNA-RNA extraction additional files/Extraction sample submission-electronic_2025.xlsx",
          root=WEBSITE),

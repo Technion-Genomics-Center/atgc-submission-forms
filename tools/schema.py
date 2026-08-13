@@ -41,6 +41,9 @@ CANONICAL_COLUMNS = {
     "experiment group": "Experimental group",
     "# cells / tissue weight": "# cells / tissue weight [mg]",
     "remarks*": "Remarks",
+    # Nitsan, 2026-08-13. Twelve workbooks said "Species", two said "Organism";
+    # one word, and it is the one the lab uses.
+    "species": "Organism",
 }
 
 # ── the module prompt's typo list, counted across the 20 workbooks ───────────
@@ -351,7 +354,10 @@ def build_spec(app, surveyed):
         report["added"].append("Sample ID dropped — the row number is the sample number")
 
     # doc 05 §16 — experimental group everywhere but the two exemptions.
-    if app["slug"] not in NO_EXPERIMENTAL_GROUP:
+    # The hardcoded set is the original two exemptions; the flag lets a form
+    # opt out without editing this file, which is where new ones will come from.
+    if (app["slug"] not in NO_EXPERIMENTAL_GROUP
+            and not app.get("no_experimental_group")):
         if "Experimental group" not in columns:
             # After the identifiers, before free-text remarks.
             pos = len(columns)
@@ -361,6 +367,11 @@ def build_spec(app, surveyed):
                     break
             columns.insert(pos, "Experimental group")
             report["added"].append("Experimental group (sample column)")
+
+    for drop in app.get("drop_columns", []):
+        if drop in columns:
+            columns.remove(drop)
+            report["added"].append(f"column dropped: {drop}")
 
     # Remarks last on every table: somewhere to say the thing the form did not
     # think to ask. Always optional.
@@ -393,6 +404,11 @@ def build_spec(app, surveyed):
         for key in ("LibraryPrep", "FlowCell", "RunMode", "Run#", "Nextseq",
                     "RunType", "Instrument"):
             vocab.pop(key, None)
+    elif app.get("no_flowcell"):
+        # Keeps its library prep; the NextSeq run settings do not apply.
+        for key in ("FlowCell", "RunMode", "Run#", "Nextseq", "RunType"):
+            vocab.pop(key, None)
+        report["added"].append("NextSeq run settings removed — not a NextSeq run")
         report["added"].append("sequencing choices removed — not a sequencing service")
     elif app.get("no_library_prep"):
         vocab.pop("LibraryPrep", None)
@@ -498,6 +514,11 @@ def build_spec(app, surveyed):
         "extraction_columns": (EXTRACTION_COLUMNS
                                if app.get("extraction") else None),
         "qc_panel": app.get("qc_panel"),
+        "no_qc": app.get("no_qc", False),
+        "no_flowcell": app.get("no_flowcell", False),
+        "extraction_always": app.get("extraction_always", False),
+        "flowcell_only_for_kits": app.get("flowcell_only_for_kits"),
+        "sample_library_types": app.get("sample_library_types"),
         "choices": choices,
         "vocabularies": vocab,
         "report": report,

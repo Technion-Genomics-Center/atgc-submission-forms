@@ -176,6 +176,13 @@ function renderChoices() {
     const fill = () => {
       const type = $('#c-librarytype').value;
       if (!type) return;
+      if (type.startsWith('Mixed')) {
+        const note = $('#table-report');
+        note.hidden = false; note.className = 'msg warn';
+        note.textContent = 'Mixed submission — please set the library type on ' +
+          'each sample row.';
+        return;
+      }
       const region = rgWrap && $('#c-region').value;
       const value = (type === '16S' && region) ? `16S ${region}` : type;
       let touched = 0;
@@ -203,7 +210,10 @@ function renderChoices() {
   /* Extraction is two questions, not one: most submissions arrive already
    * extracted, so the kit list only appears once it is wanted. */
   if (v.ExtractionService || v.ExtractionByType) {
-    add('needext', 'Do you require extraction?', ['Yes', 'No'], null, 'No');
+    /* On the extraction form itself the answer is always yes, so the question
+     * is not asked — only which nucleic acid and which service. */
+    if (!APP.extraction_always)
+      add('needext', 'Do you require extraction?', ['Yes', 'No'], null, 'No');
 
     /* Where both DNA and RNA are offered, ask which first: twelve services in
      * one dropdown is a list to scroll, four is a choice to make. */
@@ -220,10 +230,11 @@ function renderChoices() {
       });
     }
     const sync = () => {
-      const on = $('#c-needext').value === 'Yes';
+      const on = APP.extraction_always || $('#c-needext').value === 'Yes';
       if (typeWrap) typeWrap.hidden = !on;
       kit.hidden = !on || (!!byType && !$('#c-exttype').value);
       if (!on) { $('#c-extraction').value = ''; if (typeWrap) $('#c-exttype').value = ''; }
+      if (APP.extraction_always) { /* nothing to hide */ }
 
       /* doc 05 §11.2 — the note the RNAseq-extraction workbook carried. */
       let note = $('#extraction-note');
@@ -247,7 +258,8 @@ function renderChoices() {
 
   /* Cell-line authentication and the like are lab services, not sequencing
    * runs: no prep, no flow cell, and no QC-before-sequencing question. */
-  if (!APP.no_sequencing) add('qc', 'QC required', ['Yes', 'No'], null, 'Yes');
+  if (!APP.no_sequencing && !APP.no_qc)
+    add('qc', 'QC required', ['Yes', 'No'], null, 'Yes');
 
   /* Some forms name the QC service, because the library arrives finished and
    * measuring it is the only lab step. Shown only when QC is wanted. */
@@ -268,6 +280,24 @@ function renderChoices() {
     };
     $('#c-qc').addEventListener('change', syncQc);
     syncQc();
+  }
+
+  /* doc: CosMx is imaged on the instrument and never reaches a flow cell,
+   * while Visium HD is sequenced. So the run questions belong to the kit, not
+   * to the application. */
+  if (APP.flowcell_only_for_kits && $('#c-libprep')) {
+    const runFields = ['flowcell', 'runmode', 'runs'];
+    const syncRun = () => {
+      const sequenced = APP.flowcell_only_for_kits.includes($('#c-libprep').value);
+      runFields.forEach(id => {
+        const w = $(`[data-field="${id}"]`);
+        if (!w) return;
+        w.hidden = !sequenced;
+        if (!sequenced) $('#c-' + id).value = '';
+      });
+    };
+    $('#c-libprep').addEventListener('change', syncRun);
+    syncRun();
   }
 
   /* Read length follows the flow cell: the shortest read of each part is run
@@ -295,7 +325,8 @@ function dropEmptySections() {
  * material, so concentration and purity cannot be known yet; asking for none
  * means the nucleic acid is already measured. */
 function activeColumns() {
-  const wantsExtraction = $('#c-needext') && $('#c-needext').value === 'Yes';
+  const wantsExtraction = APP.extraction_always ||
+    ($('#c-needext') && $('#c-needext').value === 'Yes');
   return (wantsExtraction && APP.extraction_columns) || APP.columns;
 }
 
@@ -443,6 +474,12 @@ function setRows(n) {
 /* Most columns are free text; the ones with a fixed vocabulary get a select,
  * so nobody types "qbit" and staff have to guess. */
 function cell(col) {
+  /* A mixed 16S/18S submission sets the type per row, so the column is a
+   * dropdown rather than free text. */
+  if (col === 'Library Type' && APP.sample_library_types) {
+    return `<select data-col="${col}"><option value=""></option>` +
+      APP.sample_library_types.map(o => `<option>${o}</option>`).join('') + '</select>';
+  }
   if (col === APP.quant_column) {
     return `<select data-col="${col}"><option value=""></option>` +
       APP.quant_options.map(o => `<option>${o}</option>`).join('') + '</select>';
@@ -721,7 +758,7 @@ function validate() {
       problems.push(`Row ${i + 1}: "${APP.quant_column}" required`);
     if (activeColumns().includes('Experimental group') && rowHasData(tr) && !get('Experimental group'))
       problems.push(`Row ${i + 1}: experimental group required`);
-    const org = activeColumns().includes('Species') ? 'Species' : 'Organism';
+    const org = 'Organism';
     if (activeColumns().includes(org) && rowHasData(tr) && !get(org))
       problems.push(`Row ${i + 1}: ${org.toLowerCase()} required`);
   });
@@ -1025,6 +1062,7 @@ const COLUMN_ALIASES = {
   'remarks*': 'Remarks',
   'sample id': null,          // dropped — the row number is the sample number
   '#': null,
+  'species': 'Organism',      // renamed 2026-08-13; old tables still import
 };
 
 const norm = s => String(s == null ? '' : s).trim().replace(/\s+/g, ' ');
