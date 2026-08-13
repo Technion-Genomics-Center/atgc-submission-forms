@@ -20,3 +20,6 @@ desktop.ini
 .claude/settings.local.json
 .vscode/
 .idea/
+
+# The generated shotgun workbook is a handover artefact, not source.
+Shotgun-metagenomics-*.xlsx
