@@ -204,9 +204,9 @@ APPLICATIONS = [
          # are no longer offered. `catalog` is the canonical service each kit
          # bills as; None means the catalog has no entry yet (doc 05 §17).
          library_kits=[
-             dict(label="Visium HD",
+             dict(label="Visium HD", technology="sequencing",
                   catalog="10X Visium HD 6.5mm  [2 slides]"),
-             dict(label="Visium HD 3'",
+             dict(label="Visium HD 3'", technology="sequencing",
                   catalog="10X Visium HD 3' [2 slides]",
                   # Billing name confirmed by Nitsan; the catalog entry itself
                   # does not exist yet and has NO price. Needs adding via
@@ -214,13 +214,13 @@ APPLICATIONS = [
                   needs_catalog_entry=True, needs_price=True),
              # Priced identically; the species split exists so the lab pulls
              # the right kit. One catalog entry, two form options.
-             dict(label="CosMx x1000 mouse",
+             dict(label="CosMx x1000 mouse", technology="imaging",
                   catalog="CosMx 1000plex [2 slides]", lab_kit="mouse"),
-             dict(label="CosMx x1000 human",
+             dict(label="CosMx x1000 human", technology="imaging",
                   catalog="CosMx 1000plex [2 slides]", lab_kit="human"),
-             dict(label="CosMx x6000",
+             dict(label="CosMx x6000", technology="imaging",
                   catalog="CosMx 6000plex [2 slides]"),
-             dict(label="CosMx WT human",
+             dict(label="CosMx WT human", technology="imaging",
                   catalog="CosMx WTS [2 slides]", lab_kit="human"),
          ],
          # SpaceRanger is 10X Visium software, so the primary/full split
@@ -230,10 +230,12 @@ APPLICATIONS = [
              label="Do you require primary analysis (SpaceRanger)?",
              catalog="Primary analysis- SpaceRanger",
              only_for_kits=["Visium HD", "Visium HD 3'"]),
-         # Nitsan, 2026-08-13. CosMx is imaged on the instrument; nothing goes
-         # on a flow cell. Visium HD does get sequenced, so the sequencing
-         # questions follow the kit rather than the application.
-         flowcell_only_for_kits=["Visium HD", "Visium HD 3'"],
+         # Nitsan, 2026-08-13. CosMx is a DIFFERENT TECHNOLOGY, not a different
+         # setting: it is imaged on the instrument and never sequences, whatever
+         # the kit. Visium is sequenced. Each kit above says which it is, so a
+         # new kit cannot be added without answering the question — a list of
+         # "kits that sequence" would let a new Visium kit silently lose its
+         # sequencing questions.
          # Every CosMx kit can carry custom add-on genes, billed per gene.
          cosmx_addon=dict(
              trigger_prefix="CosMx",

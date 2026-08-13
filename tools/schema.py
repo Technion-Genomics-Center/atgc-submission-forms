@@ -517,7 +517,9 @@ def build_spec(app, surveyed):
         "no_qc": app.get("no_qc", False),
         "no_flowcell": app.get("no_flowcell", False),
         "extraction_always": app.get("extraction_always", False),
-        "flowcell_only_for_kits": app.get("flowcell_only_for_kits"),
+        # Which kits are sequenced, derived from what each kit says it is.
+        "sequenced_kits": [k["label"] for k in (app.get("library_kits") or [])
+                           if k.get("technology", "sequencing") == "sequencing"] or None,
         "sample_library_types": app.get("sample_library_types"),
         "choices": choices,
         "vocabularies": vocab,

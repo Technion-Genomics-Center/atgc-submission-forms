@@ -282,13 +282,14 @@ function renderChoices() {
     syncQc();
   }
 
-  /* doc: CosMx is imaged on the instrument and never reaches a flow cell,
-   * while Visium HD is sequenced. So the run questions belong to the kit, not
-   * to the application. */
-  if (APP.flowcell_only_for_kits && $('#c-libprep')) {
+  /* CosMx and Visium are different technologies sharing one form. CosMx is
+   * imaged on the instrument and never sequences; Visium is sequenced. Each
+   * kit declares which it is (data/applications.py), so the run questions
+   * appear only for a kit that actually reaches a flow cell. */
+  if (APP.sequenced_kits && $('#c-libprep')) {
     const runFields = ['flowcell', 'runmode', 'runs'];
     const syncRun = () => {
-      const sequenced = APP.flowcell_only_for_kits.includes($('#c-libprep').value);
+      const sequenced = APP.sequenced_kits.includes($('#c-libprep').value);
       runFields.forEach(id => {
         const w = $(`[data-field="${id}"]`);
         if (!w) return;
