@@ -1,0 +1,78 @@
+/* ATGC submission form — design tokens.
+ *
+ * These are the WEBSITE's own values, read from
+ * Y:\LAB\TGC_website\ATGC_website_2025\webpage\applications.html (read-only),
+ * so the form matches the site rather than approximating it. Do not invent a
+ * colour: if it is not here, it is not in the design system.
+ */
+
+:root {
+  /* ── the site's core tokens, verbatim ─────────────────────────────────── */
+  --ink:    #262626;
+  --blue:   #1da5ff;
+  --line:   #e3ebf2;
+  --muted:  #5f7488;
+  --radius: 12px;
+  --maxw:   1290px;
+
+  /* Kept as aliases so existing rules keep working. */
+  --rule:     var(--line);
+  --ink-soft: var(--muted);
+
+  /* ── section accents ──────────────────────────────────────────────────────
+   * The site colours each application group, and those four colours are the
+   * logo's four letters. A form inherits the colour of the group the
+   * researcher just came from, so the page feels continuous with the site. */
+  --grp-transcriptomics: #1da5ff;   /* logo A */
+  --grp-genomics:        #fda13c;   /* logo T */
+  --grp-epigenomics:     #008187;   /* logo G */
+  --grp-additional:      #e35b27;   /* logo C */
+
+  /* Overridden per page by build.py; blue is the neutral default. */
+  --accent: var(--grp-transcriptomics);
+
+  /* ── surfaces ─────────────────────────────────────────────────────────── */
+  --surface:     #ffffff;
+  --surface-alt: #f6f9fc;
+  --navy:        #112954;    /* headings and chrome, from the live site */
+
+  /* ── state ────────────────────────────────────────────────────────────────
+   * Red is reserved for blocking errors ONLY — the nine rules in doc 05 §18.1.
+   * Everything else warns, in amber, because everything else lets you export. */
+  --error:    #c4321b;
+  --error-bg: #fdf2f0;
+  --warn:     #fda13c;
+  --warn-bg:  #fff8ec;
+  --ok:       #008187;
+
+  /* ── type ─────────────────────────────────────────────────────────────────
+   * The site's own stacks. Roboto and Raleway ARE loaded from Google Fonts,
+   * the same way the website itself loads them, so the form matches it exactly.
+   *
+   * The trade: this is the page's only external request. Offline, the fonts
+   * simply do not arrive and the stack falls through to Segoe UI — the form
+   * still works completely, it just looks plainer. Nothing else on the page
+   * fetches anything, and no researcher data ever leaves the browser. */
+  --sans:    Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --display: Raleway, Roboto, "Segoe UI", sans-serif;
+
+  --font-body: var(--sans);
+  --font-head: var(--display);
+
+  /* Site sizes: 20px body copy, 14px uppercase section heads. */
+  --fs-title:   2.8rem;
+  --fs-section: 0.875rem;    /* 14px, uppercase, letter-spaced */
+  --fs-body:    1rem;
+  --fs-small:   0.875rem;
+
+  --gap:    1rem;
+  --shadow: 0 1px 3px rgba(17, 41, 84, .08);
+}
+
+/* The signature device: a 5px rule running through all four logo colours.
+ * The site uses it under the page intro; the form uses it the same way. */
+.atgc-rule {
+  height: 5px; width: 128px; border-radius: 3px; margin: 0 0 22px;
+  background: linear-gradient(90deg,
+    #1da5ff, #fda13c 34%, #008187 67%, #e35b27);
+}

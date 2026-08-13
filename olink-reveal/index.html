@@ -1,0 +1,136 @@
+<!-- Rendered by build.py into <slug>/index.html — never hand-edit the output.
+     Placeholders: Olink Reveal olink-reveal {"slug": "olink-reveal", "name": "Olink Reveal", "site": "https://atgc.net.technion.ac.il/applications/olink_reveal/", "service_page": null, "analysis": "olink", "no_analysis_question": false, "no_sequencing": false, "extraction": null, "keep_own_table": true, "primary_analysis": null, "protocol_choice": null, "qc_services": null, "cosmx_addon": null, "routing": [{"lab": "Medicine (Rappaport)", "to": ["linde@technion.ac.il"], "cc": ["nitsanf@technion.ac.il"]}], "addresses": {"Emerson": {"lines": ["Technion Genomics Center", "Room 2-2, 2nd floor, Emerson building", "Technion campus"], "phone": "073-3781387"}, "Medicine (Rappaport)": {"lines": ["Technion Genomics Center", "M1 floor, Medicine Faculty", "Efron Street, Haifa (near Rambam hospital)"], "phone": "073-3785221"}}, "quant_column": "Quantified by", "quant_options": ["Qubit", "Tapestation", "Nanodrop"], "group": "additional", "columns": ["Well ID", "Sample name", "Sample Type", "Sample Type- other", "Experimental group", "Remarks"], "choices": [{"label": "Do you require bioinformatic analysis?", "source": ""}], "vocabularies": {"YesNo": ["Yes", "No"], "Run#": ["0.5", "1", "2", "Other"], "Conc type": ["Serum", "Plasma", "Other"]}, "bioinformatics_url": "https://atgc.net.technion.ac.il/applications/bioinformatics/"} https://atgc.net.technion.ac.il/applications/ https://atgc.net.technion.ac.il/applications/olink_reveal/ -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Olink Reveal sample submission — Azrieli Technion Genomics Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;600;700&family=Roboto:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="../assets/tokens.css?v=edf5828b">
+<link rel="stylesheet" href="../assets/form.css?v=edf5828b">
+<style>:root { --accent: var(--grp-additional); }</style>
+
+<header class="masthead">
+  <img class="logo" src="../assets/atgc_logo.jpg"
+       alt="Azrieli Technion Genomics Center">
+  <div class="masthead-text">
+    <h1>Olink Reveal Submission Form</h1>
+  </div>
+  <div class="masthead-links">
+    <button type="button" id="help-open" class="help-btn">Guidance for completing this form</button>
+    <a class="guidelines" href="https://atgc.net.technion.ac.il/applications/olink_reveal/" target="_blank" rel="noopener">
+      Sample requirements &amp; guidelines &nearr;
+    </a>
+  </div>
+</header>
+
+<div class="atgc-rule"></div>
+
+<p class="flow-note">
+  Fill this in, export the file, and email it to us. Nothing is sent from this
+  page &mdash; your details stay in your browser until you attach the file.
+</p>
+
+<div id="help" class="help-panel" hidden></div>
+
+<div id="restore" class="restore" hidden></div>
+
+<form id="form" novalidate>
+
+  <!-- ── 1. who is submitting ─────────────────────────────────────────── -->
+  <section>
+    <h2>Your details</h2>
+    <div class="grid" id="header-fields"></div>
+
+    <details class="quote">
+      <summary>Have a quote? Upload it to fill in the services you were quoted</summary>
+      <p class="hint">
+        Optional &mdash; a quote is not required, and you can complete this form
+        without one. The file is read in your browser and is never uploaded.
+        It fills in the quoted services only, never your contact details.
+      </p>
+      <input type="file" id="quote-pdf" accept="application/pdf">
+      <p class="hint">Or type the quote number above.</p>
+      <div id="quote-msg" class="msg" hidden></div>
+    </details>
+  </section>
+
+  <!-- ── 2. what to run ───────────────────────────────────────────────── -->
+  <section>
+    <h2>Sequencing</h2>
+    <div class="grid" id="choice-fields"></div>
+  </section>
+
+  <!-- ── 3. the samples ───────────────────────────────────────────────── -->
+  <section>
+    <h2>Samples</h2>
+
+    <div class="rules" id="naming-rules"></div>
+
+    <div class="table-tools">
+      <label>Number of samples
+        <input type="number" id="row-count" min="1" value="1" step="1">
+      </label>
+      <button type="button" id="dl-template">Download a blank table</button>
+      <label class="upload">Upload a filled table
+        <input type="file" id="up-template" accept=".xlsx,.csv,.tsv" hidden>
+      </label>
+      <span class="hint">or paste straight from Excel into the first cell</span>
+    </div>
+
+    <div id="table-report" class="msg" hidden></div>
+    <div class="table-scroll"><table id="samples"></table></div>
+  </section>
+
+  <!-- ── 4. bioinformatics — LAST, doc 05 §1 ──────────────────────────── -->
+  <section id="bioinformatics"></section>
+
+  <!-- ── 5. sign-off ──────────────────────────────────────────────────── -->
+  <section class="legal">
+    <h2>Before you send</h2>
+    <div class="confirm" id="confirm-wrap">
+      <input type="checkbox" id="confirm">
+      <label for="confirm">
+        I confirm that the information in this form is correct and complete,
+        and I understand that excess samples are kept for one month after
+        sequencing and then discarded.
+      </label>
+    </div>
+
+    <!-- Optional, and never a gate: an opt-in request, not an acknowledgement. -->
+    <div class="confirm optional" id="keep-wrap">
+      <input type="checkbox" id="keep-samples">
+      <label for="keep-samples">
+        Please save my excess samples &mdash; I would like to collect them once
+        the project is complete.
+        <span class="note">We keep samples for up to one month after the data
+        is sent.</span>
+      </label>
+    </div>
+  </section>
+
+  <!-- ── 6. where the samples physically go ───────────────────────────── -->
+  <section id="shipping"></section>
+
+  <div id="problems" class="problems" hidden></div>
+
+  <div class="actions">
+    <button type="button" id="export-xlsx" class="primary">Download (.xlsx)</button>
+    <a id="mailto" class="mailto-btn" href="#">Email to ATGC</a>
+  </div>
+</form>
+
+<footer>
+  <img src="../assets/technion_logo.png" alt="Technion" class="tech-logo">
+  <p>
+    Azrieli Technion Genomics Center &middot;
+    <a href="https://atgc.net.technion.ac.il/applications/" target="_blank" rel="noopener">atgc.net.technion.ac.il</a>
+  </p>
+</footer>
+
+<script>window.APP = {"slug": "olink-reveal", "name": "Olink Reveal", "site": "https://atgc.net.technion.ac.il/applications/olink_reveal/", "service_page": null, "analysis": "olink", "no_analysis_question": false, "no_sequencing": false, "extraction": null, "keep_own_table": true, "primary_analysis": null, "protocol_choice": null, "qc_services": null, "cosmx_addon": null, "routing": [{"lab": "Medicine (Rappaport)", "to": ["linde@technion.ac.il"], "cc": ["nitsanf@technion.ac.il"]}], "addresses": {"Emerson": {"lines": ["Technion Genomics Center", "Room 2-2, 2nd floor, Emerson building", "Technion campus"], "phone": "073-3781387"}, "Medicine (Rappaport)": {"lines": ["Technion Genomics Center", "M1 floor, Medicine Faculty", "Efron Street, Haifa (near Rambam hospital)"], "phone": "073-3785221"}}, "quant_column": "Quantified by", "quant_options": ["Qubit", "Tapestation", "Nanodrop"], "group": "additional", "columns": ["Well ID", "Sample name", "Sample Type", "Sample Type- other", "Experimental group", "Remarks"], "choices": [{"label": "Do you require bioinformatic analysis?", "source": ""}], "vocabularies": {"YesNo": ["Yes", "No"], "Run#": ["0.5", "1", "2", "Other"], "Conc type": ["Serum", "Plasma", "Other"]}, "bioinformatics_url": "https://atgc.net.technion.ac.il/applications/bioinformatics/"};</script>
+<script src="../assets/logo_data.js?v=edf5828b"></script>
+<script src="../assets/xlsx.js?v=edf5828b"></script>
+<script src="../assets/xlsx_read.js?v=edf5828b"></script>
+<script src="../assets/quote.js?v=edf5828b"></script>
+<script src="../assets/form.js?v=edf5828b"></script>

@@ -1,0 +1,68 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sample submission forms — Azrieli Technion Genomics Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;600;700&family=Roboto:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="assets/tokens.css?v=edf5828b">
+<link rel="stylesheet" href="assets/form.css?v=edf5828b">
+<header class="masthead">
+  <img class="logo" src="assets/atgc_logo.jpg"
+       alt="Azrieli Technion Genomics Center">
+  <div class="masthead-text">
+    <h1>Sample Submission Forms</h1>
+  </div>
+</header>
+<div class="atgc-rule"></div>
+<p class="flow-note">
+  Choose your application. If you reached this page from an application page on
+  our website, that page links straight to the right form.
+</p>
+  <section class="group group-transcriptomics">
+    <h2>Transcriptomics</h2>
+    <ul class="app-list">
+      <li><a href="scrna-seq-10x/">10X scRNA-seq</a></li>
+      <li><a href="rnaseq/">RNA-seq</a></li>
+      <li><a href="spatial-transcriptomics/">Spatial transcriptomics</a></li>
+      <li><a href="mirna-seq/">miRNA-seq</a></li>
+    </ul>
+  </section>
+  <section class="group group-genomics">
+    <h2>Genomics</h2>
+    <ul class="app-list">
+      <li><a href="amplicon-seq/">Amplicon-seq</a></li>
+      <li><a href="dna-seq/">DNA-seq</a></li>
+      <li><a href="exome-seq/">Exome-seq</a></li>
+      <li><a href="metagenomics-16s-18s/">Metagenomics — 16S / 18S</a></li>
+      <li><a href="nanopore/">Oxford Nanopore</a></li>
+      <li><a href="shotgun-metagenomics/">Shotgun metagenomics</a></li>
+    </ul>
+  </section>
+  <section class="group group-epigenomics">
+    <h2>Epigenomics</h2>
+    <ul class="app-list">
+      <li><a href="chip-seq-cut-and-run/">ChIP-seq / Cut&Run</a></li>
+      <li><a href="rrbs/">RRBS</a></li>
+    </ul>
+  </section>
+  <section class="group group-additional">
+    <h2>Additional services</h2>
+    <ul class="app-list">
+      <li><a href="cell-line-authentication/">Cell-line authentication</a></li>
+      <li><a href="extraction/">DNA / RNA extraction</a></li>
+      <li><a href="dna-rna-quality-quantity/">DNA/RNA quality and quantity</a></li>
+      <li><a href="olink-reveal/">Olink Reveal</a></li>
+      <li><a href="user-prepared/">User-prepared library sequencing</a></li>
+    </ul>
+  </section>
+<footer>
+  <img src="assets/technion_logo.png" alt="Technion" class="tech-logo">
+  <p>Azrieli Technion Genomics Center &middot;
+  <a href="https://atgc.net.technion.ac.il/applications/" target="_blank" rel="noopener">atgc.net.technion.ac.il</a></p>
+</footer>
+<script>
+// An older-style ?app=<slug> link redirects to its canonical directory, so
+// anything already published keeps working.
+var slug = new URLSearchParams(location.search).get('app');
+if (slug && /^[a-z0-9-]+$/.test(slug)) location.replace(slug + '/');
+</script>
