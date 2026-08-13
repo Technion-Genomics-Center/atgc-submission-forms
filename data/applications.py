@@ -92,6 +92,16 @@ LABS = [
 
 # doc 05 §11.3 — offer every extraction service in the catalog, filtered by
 # nucleic acid. Names only; prices never reach the page.
+# doc 05 §11.2 — when extraction is wanted, the researcher is sending material,
+# not measured nucleic acid. Concentration and purity cannot be known yet, so
+# the table asks what is actually in the tube.
+EXTRACTION_COLUMNS = ["Sample name", "# cells / tissue weight [mg]", "Species",
+                      "Experimental group", "Remarks"]
+
+# A form offering both asks which nucleic acid first: twelve services in one
+# dropdown is a list to scroll, four is a choice to make.
+EXTRACTION_TYPES = ["DNA", "RNA"]
+
 EXTRACTION_SERVICES = {
     "rna": [
         "RNA extraction",
@@ -178,7 +188,13 @@ APPLICATIONS = [
          # Nitsan, 2026-08-12. The workbook predates it. Catalog carries five
          # size variants (2/4/6/8 samples, and a T10 24-sample); the researcher
          # picks the prep, staff pick the size when quoting.
-         extra_preps=["Illumina/Fluent scRNA-seq library prep"]),
+         extra_preps=["Illumina/Fluent scRNA-seq library prep"],
+         # doc 05 §3.1 — CellRanger is a priced pipeline, not a bespoke
+         # analysis, so it is asked separately and is never gated by the
+         # consultation. Unlike Spatial's SpaceRanger it applies to every kit.
+         primary_analysis=dict(
+             label="Do you require primary analysis (CellRanger)?",
+             catalog="Primary analysis- CellRanger")),
 
     dict(slug="spatial-transcriptomics", site=SITE + "spatial-transcriptomics/", name="Spatial transcriptomics",
          status=BUILD, analysis=SPATIAL,
@@ -309,12 +325,39 @@ APPLICATIONS = [
          # extraction, and nothing is sequenced, so no prep, flow cell, run mode
          # or flow-cell count belongs on it.
          no_sequencing=True,
+         extraction="dna",
          workbook="Cell-line authentication additional files/CLA-electronic_2025.xlsx",
          root=WEBSITE),
 
     dict(slug="dna-rna-quality-quantity", site=SITE + "dna-rna-quality-and-quantity/", name="DNA/RNA quality and quantity",
          status=BUILD, analysis=None, no_analysis_question=True,
          no_experimental_group=True,
+         # This IS the service — measuring. Each instrument is ordered
+         # separately and takes a different kit, so each is its own question.
+         # Kits are the workbook's own lists (Setting!Qubit, Setting!Tapestation).
+         no_sequencing=True,
+         qc_panel=dict(
+             guide_url=SITE + "dna-rna-quality-and-quantity/",
+             note=("Please supply samples at the concentration the kit requires "
+                   "\u2014 we do not dilute samples."),
+             qubit=dict(
+                 label="Do you require Qubit?",
+                 kit_label="Qubit kit",
+                 kits=["High sensitivity DNA", "Broad range RNA",
+                       "High sensitivity RNA"]),
+             tapestation=dict(
+                 label="Do you require TapeStation?",
+                 type_label="DNA or RNA?",
+                 kit_label="TapeStation kit",
+                 kits={
+                     "DNA": ["D1000 DNA", "High Sensitivity D1000 DNA",
+                             "Genomic DNA", "HS Genomic DNA"],
+                     "RNA": ["RNA [Eukaryotes]",
+                             "High Sensitivity RNA [Eukaryotes]",
+                             "RNA [Prokaryotes]",
+                             "High Sensitivity RNA [Prokaryotes]"],
+                 }),
+         ),
          workbook="DNA-RNA quality and quantity additional files/DNA-RNA_Quality_&_Quantity-electronic_2025.xlsx",
          root=WEBSITE),
 
@@ -328,6 +371,11 @@ APPLICATIONS = [
     # question is vestigial and is dropped.
     dict(slug="extraction", site=SITE + "dna-rna-extraction/", name="DNA / RNA extraction",
          status=BUILD, analysis=None, no_analysis_question=True,
+         # Nothing is sequenced here. The whole service is: extract, and measure
+         # what came out. Library prep and flow cell belong to the application
+         # that follows, on its own form.
+         no_sequencing=True, extraction="both",
+         qc_services=["Qubit measurement", "TapeStation"],
          workbook="DNA-RNA extraction additional files/Extraction sample submission-electronic_2025.xlsx",
          root=WEBSITE),
 

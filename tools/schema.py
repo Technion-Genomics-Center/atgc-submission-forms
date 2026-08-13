@@ -18,8 +18,9 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT.parent))          # for atgc.retired
 
-from data.applications import (EXTRACTION_SERVICES, FORM_PREPS, GROUP_OF,
-                               LABS, NEEDS_CATALOG_ENTRY, published)
+from data.applications import (EXTRACTION_COLUMNS, EXTRACTION_SERVICES,
+                               FORM_PREPS, GROUP_OF, LABS,
+                               NEEDS_CATALOG_ENTRY, published)
 from survey_workbooks import survey, workbooks
 
 from atgc.retired import retired_reason
@@ -426,7 +427,13 @@ def build_spec(app, surveyed):
         vocab["LibraryPrep"] = [k["label"] for k in app["library_kits"]]
         report["added"].append("Spatial kit list replaces the workbook's (doc 05 §17)")
     if app.get("extraction"):
-        vocab["ExtractionService"] = EXTRACTION_SERVICES[app["extraction"]]
+        kind = app["extraction"]
+        if kind == "both":
+            # Keyed by nucleic acid so the form can ask which, then filter.
+            vocab["ExtractionByType"] = {"DNA": EXTRACTION_SERVICES["dna"],
+                                         "RNA": EXTRACTION_SERVICES["rna"]}
+        else:
+            vocab["ExtractionService"] = EXTRACTION_SERVICES[kind]
         report["added"].append(
             f"{app['extraction'].upper()} extraction services (doc 05 §11)")
     if app.get("library_types"):
@@ -488,6 +495,9 @@ def build_spec(app, surveyed):
         "quant_options": QUANT_OPTIONS,
         "group": GROUP_OF.get(app["slug"], "transcriptomics"),
         "columns": columns,
+        "extraction_columns": (EXTRACTION_COLUMNS
+                               if app.get("extraction") else None),
+        "qc_panel": app.get("qc_panel"),
         "choices": choices,
         "vocabularies": vocab,
         "report": report,

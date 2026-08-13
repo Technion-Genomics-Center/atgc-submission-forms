@@ -336,3 +336,9 @@ th         { background: var(--navy); }
   .masthead { flex-wrap: wrap; }
   .masthead-links { align-items: flex-start; width: 100%; }
 }
+
+/* ── the quality-and-quantity panel ───────────────────────────────────────── */
+.qc-panel { margin-top: .5rem; }
+.qc-panel .field { max-width: 26rem; margin-bottom: .6rem; }
+.qc-panel .field.wide { max-width: 34rem; }
+.qc-panel .msg.warn { font-weight: 600; }
