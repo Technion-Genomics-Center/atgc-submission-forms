@@ -1,7 +1,7 @@
 ﻿application_slug,application_name,lab,to,cc
 scrna-seq-10x,10X scRNA-seq,Emerson,,
 scrna-seq-10x,10X scRNA-seq,Medicine (Rappaport),linde@technion.ac.il,nitsanf@technion.ac.il
-amplicon-seq,Amplicon-seq,Emerson,angelao@technion.ac.il,nitsanf@technion.ac.il
+amplicon-seq,Amplicon-seq,Emerson,linde@technion.ac.il,nitsanf@technion.ac.il
 amplicon-seq,Amplicon-seq,Medicine (Rappaport),linde@technion.ac.il,nitsanf@technion.ac.il
 cell-line-authentication,Cell-line authentication,Emerson,,
 cell-line-authentication,Cell-line authentication,Medicine (Rappaport),linde@technion.ac.il,nitsanf@technion.ac.il

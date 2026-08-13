@@ -783,8 +783,6 @@ function validate() {
       (problems.length > 12 ? `<li>…and ${problems.length - 12} more</li>` : '') + '</ul>';
   }
   $('#export-xlsx').disabled = !!problems.length;
-  const mail = $('#mailto');
-  mail.setAttribute('aria-disabled', problems.length ? 'true' : 'false');
   return problems;
 }
 
@@ -865,35 +863,36 @@ function renderShipping() {
   }).join('');
 }
 
-/* ── the email, addressed by lab ───────────────────────────────────────── */
-function updateMailto() {
-  const chosen = (APP.routing || []).find(r => r.lab === $('#f-lab').value);
-  const link = $('#mailto');
-  if (!chosen) {
-    link.removeAttribute('href');
-    link.textContent = 'Choose a lab to address the email';
-    return;
-  }
-  const n = [...$('#samples tbody').rows].filter(rowHasData).length;
-  const pi = $('#f-group').value.trim() || $('#f-name').value.trim() || 'unknown';
-  const subject = `ATGC submission - ${APP.name} - ${pi} - ${n} samples`;
-  const body = [
-    'The completed submission form is attached.',
-    '',
-    'Application: ' + APP.name,
-    'Samples: ' + n,
-    'Keep excess samples for collection: ' +
-      (document.getElementById('keep-samples').checked ? 'YES' : 'no'),
-    'Submission id: ' + state.id,
-  ].join('\n');
-  /* cc is a QUERY parameter: everything before the '?' is the To list, so an
-   * '&cc=' spliced in there becomes part of the last recipient's address. */
-  const params = [];
-  if (chosen.cc && chosen.cc.length) params.push('cc=' + encodeURIComponent(chosen.cc.join(',')));
-  params.push('subject=' + encodeURIComponent(subject));
-  params.push('body=' + encodeURIComponent(body));
-  link.href = 'mailto:' + chosen.to.join(',') + '?' + params.join('&');
-  link.textContent = 'Email to ' + chosen.lab;
+/* ── who to email the downloaded file to ───────────────────────────────── */
+/* There is no mailto button any more. A mailto cannot attach the file, so it
+ * produced a half-written email the researcher still had to attach to — and on
+ * a machine with no desktop mail client it did nothing at all. Download, then
+ * tell them plainly where to send it. Addresses come from data/routing.csv, so
+ * FormAdmin can change them without touching this file. */
+function renderSendTo() {
+  const box = $('#send-to');
+  if (!box) return;
+  const routes = APP.routing || [];
+  const chosen = routes.find(r => r.lab === $('#f-lab').value);
+
+  /* Before a lab is picked, show every lab's address rather than nothing — the
+   * same reasoning as the shipping block above it. */
+  const show = chosen ? [chosen] : routes;
+  const one = show.length === 1;
+
+  const line = r => {
+    const all = [...(r.to || []), ...(r.cc || [])];
+    return `<p class="send-row">` +
+      (one ? '' : `<span class="send-lab">${r.lab}</span>`) +
+      all.map(a => `<a href="mailto:${a}">${a}</a>`).join(' <span class="sep">and</span> ') +
+      `</p>`;
+  };
+
+  box.innerHTML = '<h2>Where to send the completed form</h2>' +
+    '<p class="send-lead">Download the file below, then attach it to an email to:</p>' +
+    show.map(line).join('') +
+    '<p class="send-note">Please attach the <strong>.xlsx</strong> file itself — ' +
+    'do not paste the table into the message body.</p>';
 }
 
 
@@ -1036,9 +1035,16 @@ function download() {
 
   /* The draft has done its job once the file exists. */
   try { localStorage.removeItem(KEY); } catch (e) {}
+  /* Name the recipients again here. This message is the last thing a
+   * researcher reads, and "attach it to the email" leaves them scrolling back
+   * up to find out which email. */
+  const r = (APP.routing || []).find(x => x.lab === $('#f-lab').value);
+  const who = r ? [...(r.to || []), ...(r.cc || [])].join(' and ') : '';
   const note = $('#table-report');
   note.hidden = false; note.className = 'msg ok';
-  note.textContent = `Saved ${fileName()} — now attach it to the email.`;
+  note.textContent = `Saved ${fileName()}` +
+    (who ? ` — now email it as an attachment to ${who}.`
+         : ' — now email it to us as an attachment.');
 }
 
 $('#export-xlsx').addEventListener('click', download);
@@ -1314,11 +1320,12 @@ function helpHtml() {
     <li>Complete your contact details and the sequencing requirements.</li>
     <li>Enter your samples (see <em>Large sample sets</em> below).</li>
     <li>Confirm the declaration at the foot of the form.</li>
-    <li>Select <strong>Download (.xlsx)</strong>, then <strong>Email to ATGC</strong>
-        and attach the downloaded file.</li>
+    <li>Select <strong>Download (.xlsx)</strong>.</li>
+    <li>Attach the downloaded file to an email addressed to the recipients
+        shown under <em>Where to send the completed form</em>.</li>
   </ol>
-  <p class="help-note">Browsers cannot attach a file to an email automatically.
-  Please attach it before sending.</p>
+  <p class="help-note">Please send the .xlsx file as an attachment. The table
+  cannot be read if it is pasted into the body of the message.</p>
 
   <h3>Using your quote</h3>
   <p>A quote is <strong>not required</strong>; samples may be submitted without
@@ -1360,8 +1367,9 @@ function helpHtml() {
   is selected above.</p>
 
   <h3>Assistance</h3>
-  <p>Please contact us if anything is unclear. The <strong>Email to ATGC</strong>
-  link at the foot of the form is already addressed correctly.</p>`;
+  <p>Please contact us if anything is unclear. The addresses are listed under
+  <em>Where to send the completed form</em>, and depend on the laboratory
+  selected above.</p>`;
 }
 
 function toggleHelp(show) {
@@ -1397,9 +1405,9 @@ $('#row-count').addEventListener('change', e => {
 });
 document.addEventListener('input', () => { saveDraft(); });
 document.addEventListener('change', () => {
-  validate(); updateMailto(); renderShipping(); saveDraft();
+  validate(); renderSendTo(); renderShipping(); saveDraft();
 });
 state.id = submissionId();
 validate();
-updateMailto();
+renderSendTo();
 renderShipping();
