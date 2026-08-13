@@ -122,9 +122,15 @@ function renderHeader() {
 
 function renderChoices() {
   const box = $('#choice-fields');
+
+  /* "Sequencing" is wrong on a form that sequences nothing — extraction,
+   * cell-line authentication and quality-and-quantity all ask for services
+   * instead. */
+  if (APP.no_sequencing) $('#choices-heading').textContent = 'Services required';
   const v = APP.vocabularies || {};
   const add = (id, label, opts, help, dflt) => {
-    if (!opts || !opts.length) return null;
+    // An empty list is legitimate when the options are filled in later.
+    if (!opts) return null;
     const wrap = document.createElement('div');
     wrap.className = 'field';
     wrap.dataset.field = id;
@@ -159,19 +165,82 @@ function renderChoices() {
   const quoteHelp = 'If you are unsure, this is stated on your quote — the ' +
     'names here match the names there.';
   add('libprep', 'Library preparation', v.LibraryPrep, quoteHelp);
-  add('librarytype', 'Library type', v.LibraryType);
-  add('region', '16S region', v.Region);
+  const ltWrap = add('librarytype', 'Library type', v.LibraryType);
+  const rgWrap = add('region', '16S region', v.Region);
+
+  /* doc 05 §4.1 — the header choice fills the per-sample Library Type column,
+   * folding the region in for 16S. A hand-edited row is never overwritten:
+   * the header says what the submission contains, the column says what each
+   * sample is, and only the researcher knows when they differ. */
+  if (ltWrap && APP.columns.includes('Library Type')) {
+    const fill = () => {
+      const type = $('#c-librarytype').value;
+      if (!type) return;
+      const region = rgWrap && $('#c-region').value;
+      const value = (type === '16S' && region) ? `16S ${region}` : type;
+      let touched = 0;
+      document.querySelectorAll('#samples tbody [data-col="Library Type"]')
+        .forEach(el => { if (!el.dataset.edited) el.value = value; else touched++; });
+      if (touched) {
+        const note = $('#table-report');
+        note.hidden = false; note.className = 'msg warn';
+        note.textContent = `${touched} row(s) have a library type you set by ` +
+          'hand and were left alone.';
+      }
+    };
+    ['c-librarytype', 'c-region'].forEach(id => {
+      const el = $('#' + id); if (el) el.addEventListener('change', fill);
+    });
+    document.addEventListener('input', e => {
+      if (e.target.dataset && e.target.dataset.col === 'Library Type')
+        e.target.dataset.edited = '1';
+    });
+  }
   add('flowcell', 'Flow cell', v.FlowCell, quoteHelp);
   add('runmode', 'Run mode', v.RunMode);
   add('runs', 'Number of flow cells', v['Run#'], null, '1');
 
   /* Extraction is two questions, not one: most submissions arrive already
    * extracted, so the kit list only appears once it is wanted. */
-  if (v.ExtractionService) {
+  if (v.ExtractionService || v.ExtractionByType) {
     add('needext', 'Do you require extraction?', ['Yes', 'No'], null, 'No');
-    const kit = add('extraction', 'Extraction service', v.ExtractionService);
-    const sync = () => { kit.hidden = $('#c-needext').value !== 'Yes';
-                         if (kit.hidden) $('#c-extraction').value = ''; };
+
+    /* Where both DNA and RNA are offered, ask which first: twelve services in
+     * one dropdown is a list to scroll, four is a choice to make. */
+    const byType = v.ExtractionByType;
+    const typeWrap = byType
+      ? add('exttype', 'DNA or RNA?', Object.keys(byType)) : null;
+    const kit = add('extraction', 'Extraction service',
+                    byType ? [] : v.ExtractionService);
+    if (byType) {
+      $('#c-exttype').addEventListener('change', () => {
+        const list = byType[$('#c-exttype').value] || [];
+        $('#c-extraction').innerHTML = '<option value=""></option>' +
+          list.map(o => `<option>${o}</option>`).join('');
+      });
+    }
+    const sync = () => {
+      const on = $('#c-needext').value === 'Yes';
+      if (typeWrap) typeWrap.hidden = !on;
+      kit.hidden = !on || (!!byType && !$('#c-exttype').value);
+      if (!on) { $('#c-extraction').value = ''; if (typeWrap) $('#c-exttype').value = ''; }
+
+      /* doc 05 §11.2 — the note the RNAseq-extraction workbook carried. */
+      let note = $('#extraction-note');
+      if (on && !note) {
+        note = document.createElement('p');
+        note.id = 'extraction-note';
+        note.className = 'msg warn';
+        note.textContent = 'For extraction from tissue, please state whether ' +
+          'the material is fresh or frozen in the Remarks column. Concentration ' +
+          'and purity cannot be known before extraction, so those columns are ' +
+          'not asked for.';
+        $('#choice-fields').parentElement.appendChild(note);
+      } else if (!on && note) { note.remove(); }
+
+      reshapeSamples();
+    };
+    if (byType) $('#c-exttype').addEventListener('change', sync);
     $('#c-needext').addEventListener('change', sync);
     sync();
   }
@@ -222,14 +291,134 @@ function dropEmptySections() {
   });
 }
 
+/* Which set of columns applies right now. Asking for extraction means sending
+ * material, so concentration and purity cannot be known yet; asking for none
+ * means the nucleic acid is already measured. */
+function activeColumns() {
+  const wantsExtraction = $('#c-needext') && $('#c-needext').value === 'Yes';
+  return (wantsExtraction && APP.extraction_columns) || APP.columns;
+}
+
+/* DNA/RNA quality and quantity is not a step before sequencing — measuring IS
+ * the service. Each instrument is ordered separately and takes a different kit,
+ * so each gets its own question, and the kit list only appears once the
+ * instrument is wanted. */
+function renderQcPanel() {
+  const cfg = APP.qc_panel;
+  if (!cfg) return;
+  const box = $('#choice-fields');
+
+  const block = document.createElement('div');
+  block.className = 'qc-panel';
+  block.innerHTML = `
+    <p class="hint">Not sure which kit you need?
+      <a href="${cfg.guide_url}" target="_blank" rel="noopener">See the kit
+      options on our website &nearr;</a></p>
+    <p class="msg warn">${cfg.note}</p>
+
+    <div class="field" data-field="qubit">
+      <label>${cfg.qubit.label}
+        <select id="c-qubit"><option value=""></option><option>Yes</option><option selected>No</option></select>
+      </label>
+    </div>
+    <div class="field wide" data-field="qubitkit" hidden>
+      <label>${cfg.qubit.kit_label}
+        <select id="c-qubitkit"><option value=""></option>${
+          cfg.qubit.kits.map(k => `<option>${k}</option>`).join('')}</select>
+      </label>
+    </div>
+
+    <div class="field" data-field="tapestation">
+      <label>${cfg.tapestation.label}
+        <select id="c-tapestation"><option value=""></option><option>Yes</option><option selected>No</option></select>
+      </label>
+    </div>
+    <div class="field" data-field="tstype" hidden>
+      <label>${cfg.tapestation.type_label}
+        <select id="c-tstype"><option value=""></option>${
+          Object.keys(cfg.tapestation.kits).map(k => `<option>${k}</option>`).join('')}</select>
+      </label>
+    </div>
+    <div class="field wide" data-field="tskit" hidden>
+      <label>${cfg.tapestation.kit_label}
+        <select id="c-tskit"><option value=""></option></select>
+      </label>
+    </div>`;
+  box.parentElement.insertBefore(block, box.nextSibling);
+
+  const show = (sel, on) => { $(`[data-field="${sel}"]`).hidden = !on;
+                              if (!on) $('#c-' + sel).value = ''; };
+
+  $('#c-qubit').addEventListener('change', e =>
+    show('qubitkit', e.target.value === 'Yes'));
+
+  const syncTs = () => {
+    const on = $('#c-tapestation').value === 'Yes';
+    show('tstype', on);
+    const type = $('#c-tstype').value;
+    show('tskit', on && !!type);
+    if (on && type) {
+      const kits = cfg.tapestation.kits[type] || [];
+      $('#c-tskit').innerHTML = '<option value=""></option>' +
+        kits.map(k => `<option>${k}</option>`).join('');
+    }
+  };
+  $('#c-tapestation').addEventListener('change', syncTs);
+  $('#c-tstype').addEventListener('change', syncTs);
+  syncTs();
+}
+
 function renderSamples() {
   $('#naming-rules').textContent = NAMING_TEXT;
   const t = $('#samples');
+  const cols = activeColumns();
   t.innerHTML =
     '<thead><tr><th></th>' +
-    APP.columns.map(c => `<th>${c}</th>`).join('') +
+    cols.map(c => `<th>${c}</th>`).join('') +
     '</tr></thead><tbody></tbody>';
   setRows(1);
+}
+
+/* Swap the columns without losing what has been typed: anything whose column
+ * survives the swap keeps its value. Silently discarding a filled table would
+ * be the worst possible response to changing one dropdown. */
+function reshapeSamples() {
+  const body = $('#samples tbody');
+  if (!body) return;
+  const before = activeColumns.previous || APP.columns;
+  const after = activeColumns();
+  if (before.join('|') === after.join('|')) return;
+
+  const kept = [...body.rows].map(tr => {
+    const row = {};
+    before.forEach((c, i) => {
+      const el = tr.querySelectorAll('input,select')[i];
+      if (el && el.value.trim()) row[c] = el.value.trim();
+    });
+    return row;
+  });
+  const lost = before.filter(c => !after.includes(c))
+    .filter(c => kept.some(r => r[c]));
+
+  activeColumns.previous = after;
+  const n = body.rows.length;
+  renderSamples();
+  setRows(n);
+  [...$('#samples tbody').rows].forEach((tr, i) => {
+    after.forEach(c => {
+      const el = tr.querySelector(`[data-col="${c}"]`);
+      if (el && kept[i] && kept[i][c] !== undefined) el.value = kept[i][c];
+    });
+  });
+
+  if (lost.length) {
+    const note = $('#table-report');
+    note.hidden = false; note.className = 'msg warn';
+    note.textContent = 'The sample table changed for an extraction submission. ' +
+      'These columns no longer apply and their values were dropped: ' +
+      lost.join(', ') + '.';
+  }
+  validate(); saveDraft();
 }
 
 function setRows(n) {
@@ -246,7 +435,7 @@ function setRows(n) {
   while (body.rows.length < n) {
     const tr = body.insertRow();
     tr.innerHTML = `<td class="rownum">${body.rows.length}</td>` +
-      APP.columns.map(c => `<td>${cell(c)}</td>`).join('');
+      activeColumns().map(c => `<td>${cell(c)}</td>`).join('');
   }
   $('#row-count').value = body.rows.length;
 }
@@ -281,7 +470,7 @@ function renderBioinformatics() {
       <a href="${APP.bioinformatics_url}" target="_blank" rel="noopener">What analysis involves &nearr;</a></p>
     </div>
     ${APP.primary_analysis ? `
-    <div class="field" data-field="primary" id="primary-wrap" hidden>
+    <div class="field" data-field="primary" id="primary-wrap">
       <label>${APP.primary_analysis.label}
         <select id="c-primary"><option value=""></option><option>Yes</option><option>No</option></select>
       </label>
@@ -293,15 +482,74 @@ function renderBioinformatics() {
     </div>
     <div id="analysis-panel"></div>`;
 
-  $('#c-analysis').addEventListener('change', e => {
-    const yes = e.target.value === 'Yes';
+  const openPanel = () => {
+    const yes = $('#c-analysis').value === 'Yes';
     $('#consult').classList.toggle('quiet', !yes);
     $('#analysis-panel').innerHTML = yes ? panelFor(APP.analysis) : '';
+    if (yes) {
+      const rule = BRANCHES[APP.analysis];
+      if (rule && $('#a-' + rule.on)) {
+        $('#a-' + rule.on).addEventListener('change', () => renderBranch(APP.analysis));
+      }
+      renderBranch(APP.analysis);
+    }
     validate();
+  };
+  $('#c-analysis').addEventListener('change', openPanel);
+
+  /* doc 05 §3.2 — SpaceRanger is 10X Visium software, so it is only asked for a
+   * Visium kit. Switching to CosMx must clear the answer rather than exporting
+   * an order for something that does not apply. */
+  const onlyFor = APP.primary_analysis && APP.primary_analysis.only_for_kits;
+  if (onlyFor && $('#c-libprep')) {
+    const syncPrimary = () => {
+      const show = onlyFor.includes($('#c-libprep').value);
+      $('#primary-wrap').hidden = !show;
+      if (!show) $('#c-primary').value = '';
+    };
+    $('#c-libprep').addEventListener('change', syncPrimary);
+    syncPrimary();
+  }
+
+  /* doc 05 §17 — every CosMx kit can carry custom add-on genes, billed per
+   * gene. Not shown for Visium. */
+  if (APP.cosmx_addon && $('#c-libprep')) {
+    const cfg = APP.cosmx_addon;
+    const wrap = document.createElement('div');
+    wrap.className = 'field';
+    wrap.dataset.field = 'addon';
+    wrap.innerHTML = `<label>${cfg.question}
+        <select id="c-addon"><option value=""></option><option>Yes</option><option>No</option></select>
+      </label>
+      <div class="field" data-field="addonqty" hidden>
+        <label>${cfg.quantity}<input type="number" id="c-addonqty" min="1"></label>
+      </div>`;
+    $('#choice-fields').appendChild(wrap);
+    const syncAddon = () => {
+      const isCosmx = ($('#c-libprep').value || '').startsWith(cfg.trigger_prefix);
+      wrap.hidden = !isCosmx;
+      if (!isCosmx) { $('#c-addon').value = ''; $('#c-addonqty').value = ''; }
+      $('[data-field="addonqty"]').hidden = !isCosmx || $('#c-addon').value !== 'Yes';
+    };
+    $('#c-libprep').addEventListener('change', syncAddon);
+    $('#c-addon').addEventListener('change', syncAddon);
+    syncAddon();
+  }
+
+  /* The RNA-seq questions depend on the library prep, so rebuild if it moves. */
+  if ($('#c-libprep')) $('#c-libprep').addEventListener('change', () => {
+    if ($('#c-analysis').value === 'Yes') openPanel();
   });
 }
 
-/* Field sets from doc 05. Only the selected application's set is rendered. */
+/* Field sets from doc 05. Only the selected application's set is rendered.
+ *
+ * A field is [id, label, required] and renders as free text, or
+ * [id, label, required, 'choice', [options]] where the spec names a fixed set
+ * of answers. BRANCHES adds the fields that only apply once a particular
+ * answer is given — DNA-seq asks four quite different things depending on the
+ * type of analysis, and asking all of them at once would be nonsense.
+ */
 const SETS = {
   rnaseq: [['aim', 'Biological question and analysis aim', 1],
            ['comparisons', 'Comparisons required — detail each one', 1],
@@ -314,49 +562,119 @@ const SETS = {
             ['aim', 'Analysis aim', 1],
             ['describe', 'Describe the analysis required', 1]],
   amplicon_16s: [['aim', 'Biological question and analysis aim', 1],
-                 ['compare', 'Do you want to compare between experimental groups?', 1],
+                 ['compare', 'Compare between experimental groups?', 1,
+                  'choice', ['Yes', 'No']],
                  ['comparisons', 'If yes — detail the comparisons', 0],
-                 ['env', 'Sample / environment type', 0],
-                 ['lowbiomass', 'Low-biomass samples', 0]],
+                 ['env', 'Sample / environment type (gut, soil, water…)', 0],
+                 ['lowbiomass', 'Low-biomass samples?', 0, 'choice', ['Yes', 'No']]],
   amplicon: [['aim', 'Biological question and analysis aim', 1],
              ['describe', 'Describe the requested analysis', 1]],
   rrbs: [['describe', 'Analysis requirements — describe what you need', 1]],
   olink: [['comparisons', 'Comparisons required — detail each one', 1]],
+  chip: [['aim', 'Biological question and analysis aim', 1],
+         ['ref', 'Genome reference (URL)', 0],
+         ['gtf', 'Annotation (GTF) file (URL)', 0],
+         ['diff', 'Is differential analysis required?', 1, 'choice', ['Yes', 'No']],
+         ['comparisons', 'If yes — detail the comparisons', 0],
+         ['genes', 'Genes for validation', 0],
+         ['pathways', 'Biological pathways of interest', 0]],
+  exome: [['aim', 'Biological question and analysis aim', 1],
+          ['ref', 'Genome reference (URL)', 0],
+          ['gtf', 'Annotation (GTF) file (URL)', 0],
+          ['freq', 'Expected variant frequency', 1, 'choice', ['>50%', '<50%']],
+          ['refsample', 'Reference sample for comparison', 1]],
+  dnaseq: [['aim', 'Biological question and analysis aim', 1],
+           ['type', 'Type of analysis', 1, 'choice',
+            ['De-novo assembly', 'Assembly', 'Variant analysis', 'Metagenomic']]],
+  user_prepared: [['which', 'Which analysis do you require?', 1, 'choice',
+                   ['RNA-seq — differential expression', 'Metatranscriptomics',
+                    'scRNA-seq — full analysis', '16S / 18S',
+                    'Shotgun metagenomics', 'Amplicon-seq',
+                    'DNA-seq — variant analysis', 'DNA-seq — de-novo assembly',
+                    'ChIP-seq / Cut&Run', 'RRBS', 'Other']]],
 };
 SETS.scrna = SETS.rnaseq;
 SETS.shotgun = SETS.amplicon_16s.concat([
-  ['functional', 'Functional / pathway profiling required?', 0],
-  ['mags', 'Assembly and binning (MAGs) required?', 0]]);
-SETS.dnaseq = [['aim', 'Biological question and analysis aim', 1],
-               ['type', 'Type of analysis', 1]];
-SETS.exome = [['aim', 'Biological question and analysis aim', 1],
-              ['ref', 'Genome reference (URL)', 0],
-              ['gtf', 'Annotation (GTF) file (URL)', 0],
-              ['freq', 'Expected variant frequency (>50% / <50%)', 1],
-              ['refsample', 'Reference sample for comparison', 1]];
-SETS.chip = [['aim', 'Biological question and analysis aim', 1],
-             ['ref', 'Genome reference (URL)', 0],
-             ['gtf', 'Annotation (GTF) file (URL)', 0],
-             ['diff', 'Is differential analysis required?', 1],
-             ['comparisons', 'If yes — detail the comparisons', 0],
-             ['genes', 'Genes for validation', 0],
-             ['pathways', 'Biological pathways of interest', 0]];
-SETS.user_prepared = [['which', 'Which analysis do you require?', 1],
-                      ['aim', 'Biological question and analysis aim', 1]];
+  ['functional', 'Functional / pathway profiling required?', 0, 'choice', ['Yes', 'No']],
+  ['mags', 'Assembly and binning (MAGs) required?', 0, 'choice', ['Yes', 'No']]]);
 
-function panelFor(kind) {
-  const set = SETS[kind] || SETS.rnaseq;
+/* doc 05 §2.1 — bacterial rRNA-removal work may be metatranscriptomics, which
+ * is a metagenomics question rather than a differential-expression one. */
+const RNASEQ_BRANCH_PREP = 'NEBNext Directional RNA Library Prep [rRNA removal bacteria]';
+
+const BRANCHES = {
+  dnaseq: {
+    on: 'type',
+    options: {
+      'De-novo assembly': [
+        ['similar', 'Similar or closely related reference genomes, if any (link)', 0]],
+      'Assembly': [
+        ['ref', 'Genome reference (URL)', 0],
+        ['gtf', 'Annotation (GTF) file (URL)', 0]],
+      'Variant analysis': [
+        ['ref', 'Genome reference (URL)', 0],
+        ['gtf', 'Annotation (GTF) file (URL)', 0],
+        ['freq', 'Expected variant frequency', 1, 'choice', ['>50%', '<50%']],
+        ['refsample', 'Reference sample for comparison', 1]],
+      'Metagenomic': [
+        ['compare', 'Compare between experimental groups?', 1, 'choice', ['Yes', 'No']],
+        ['comparisons', 'If yes — detail the comparisons', 0],
+        ['env', 'Sample / environment type', 0],
+        ['functional', 'Functional / pathway profiling required?', 0, 'choice', ['Yes', 'No']],
+        ['mags', 'Assembly and binning (MAGs) required?', 0, 'choice', ['Yes', 'No']]],
+    },
+  },
+  rnaseq: {
+    on: 'analysistype',
+    options: { 'Metatranscriptomics': null },   // null = replace with the shotgun set
+  },
+};
+
+function fieldRow(spec) {
+  const [id, label, req, kind, options] = spec;
+  const control = kind === 'choice'
+    ? `<select id="a-${id}" data-required="${req}"><option value=""></option>` +
+      options.map(o => `<option>${o}</option>`).join('') + '</select>'
+    : `<textarea id="a-${id}" data-required="${req}"></textarea>`;
   const NCBI = 'We use the most up-to-date genome and annotation version from ' +
     'NCBI. If another version is required, please provide a link.';
-  return '<div class="stack">' + set.map(([id, label, req]) => {
-    const note = (id === 'ref' || id === 'gtf')
-      ? `<p class="hint">${NCBI}</p>` : '';
-    return `<div class="field wide" data-field="a-${id}"><label>${label}` +
-      (req ? '<span class="req">*</span>' : '') +
-      `<textarea id="a-${id}" data-required="${req}"></textarea></label>${note}</div>`;
-  }).join('') + '</div>' +
-  '<p class="hint">Fields marked * must be filled in before you can export. ' +
-  'Hebrew is accepted in this section.</p>';
+  const note = (id === 'ref' || id === 'gtf') ? `<p class="hint">${NCBI}</p>` : '';
+  return `<div class="field wide" data-field="a-${id}"><label>${label}` +
+         (req ? '<span class="req">*</span>' : '') + control + '</label>' + note + '</div>';
+}
+
+function panelFor(kind) {
+  let set = SETS[kind] || SETS.rnaseq;
+
+  /* doc 05 §2.1 — the bacterial rRNA-removal prep can be either differential
+   * expression or metatranscriptomics, and they ask different things. */
+  const prep = $('#c-libprep') && $('#c-libprep').value;
+  const needsBranch = kind === 'rnaseq' && prep === RNASEQ_BRANCH_PREP;
+  if (needsBranch) {
+    set = [['analysistype', 'Analysis type', 1, 'choice',
+            ['Differential expression', 'Metatranscriptomics']]].concat(set);
+  }
+
+  return '<div class="stack" id="analysis-fields">' +
+    set.map(fieldRow).join('') + '</div>' +
+    '<div class="stack" id="analysis-branch"></div>' +
+    '<p class="hint">Fields marked * must be filled in before you can export. ' +
+    'Hebrew is accepted in this section.</p>';
+}
+
+/* Show the fields that only apply to the answer just given. */
+function renderBranch(kind) {
+  const box = $('#analysis-branch');
+  if (!box) return;
+  const rule = BRANCHES[kind];
+  if (!rule) { box.innerHTML = ''; return; }
+  const chosen = $('#a-' + rule.on) && $('#a-' + rule.on).value;
+  if (!chosen || !(chosen in rule.options)) { box.innerHTML = ''; validate(); return; }
+
+  const extra = rule.options[chosen];
+  // A null branch means "ask the shotgun questions instead", not "ask nothing".
+  box.innerHTML = (extra || SETS.shotgun.slice(1)).map(fieldRow).join('');
+  validate();
 }
 
 /* ── validation — nine blocking rules, doc 05 §18.1 ────────────────────── */
@@ -401,14 +719,15 @@ function validate() {
     const conc = get('ng/ul');
     if (conc && !get(APP.quant_column))
       problems.push(`Row ${i + 1}: "${APP.quant_column}" required`);
-    if (APP.columns.includes('Experimental group') && rowHasData(tr) && !get('Experimental group'))
+    if (activeColumns().includes('Experimental group') && rowHasData(tr) && !get('Experimental group'))
       problems.push(`Row ${i + 1}: experimental group required`);
-    const org = APP.columns.includes('Species') ? 'Species' : 'Organism';
-    if (APP.columns.includes(org) && rowHasData(tr) && !get(org))
+    const org = activeColumns().includes('Species') ? 'Species' : 'Organism';
+    if (activeColumns().includes(org) && rowHasData(tr) && !get(org))
       problems.push(`Row ${i + 1}: ${org.toLowerCase()} required`);
   });
 
   document.querySelectorAll('#analysis-panel [data-required="1"]').forEach(el => {
+    if (el.closest('[hidden]')) return;
     const bad = !el.value.trim();
     el.closest('.field').classList.toggle('is-error', bad);
     if (bad) problems.push(el.previousSibling ? el.closest('label').textContent.replace('*', '').trim() : 'analysis field');
@@ -623,7 +942,7 @@ function collect() {
   }
 
   /* ── sheet 2: the samples ──────────────────────────────────────────────── */
-  const samples = [['#', ...APP.columns].map(K)];
+  const samples = [['#', ...activeColumns()].map(K)];
   [...document.querySelectorAll('#samples tbody tr')].forEach((tr, i) => {
     if (!rowHasData(tr)) return;                // never export empty rows
     samples.push([i + 1, ...[...tr.querySelectorAll('input,select')].map(el => el.value.trim())]);
@@ -632,7 +951,7 @@ function collect() {
   const sheets = [
     { name: 'Submission', rows: submission, cols: [34, 62] },
     { name: 'Samples', rows: samples,
-      cols: [5, ...APP.columns.map(c => c === 'Remarks' ? 34 : 16)] },
+      cols: [5, ...activeColumns().map(c => c === 'Remarks' ? 34 : 16)] },
   ];
 
   /* ── sheet 3: analysis, only when there is any ─────────────────────────── */
@@ -713,17 +1032,18 @@ const norm = s => String(s == null ? '' : s).trim().replace(/\s+/g, ' ');
 function canonicalColumn(name) {
   const key = norm(name).toLowerCase();
   if (key in COLUMN_ALIASES) return COLUMN_ALIASES[key];
-  const hit = APP.columns.find(c => c.toLowerCase() === key);
+  const hit = activeColumns().find(c => c.toLowerCase() === key);
   return hit || norm(name);
 }
 
 function downloadTemplate() {
-  const rows = [APP.columns.map(c => ({ v: c, s: 'head' }))];
+  const cols = activeColumns();
+  const rows = [cols.map(c => ({ v: c, s: 'head' }))];
   // A few blank rows so the file opens looking like a table, not a lone header.
-  for (let i = 0; i < 24; i++) rows.push(APP.columns.map(() => ''));
+  for (let i = 0; i < 24; i++) rows.push(cols.map(() => ''));
   const blob = XLSX.build(
     [{ name: 'Samples', rows,
-       cols: APP.columns.map(c => c === 'Remarks' ? 34 : 16) }],
+       cols: cols.map(c => c === 'Remarks' ? 34 : 16) }],
     { accent: ACCENT });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -757,13 +1077,13 @@ async function uploadTable(file) {
   const matched = [], ignored = [];
   header.forEach((h, i) => {
     if (h === null) return;                       // deliberately dropped
-    if (APP.columns.includes(h)) matched.push({ from: i, col: h });
+    if (activeColumns().includes(h)) matched.push({ from: i, col: h });
     else if (norm(rows[0][i])) ignored.push(norm(rows[0][i]));
   });
 
   if (!matched.length) {
     say('err', 'None of the column headings in that file match this form. ' +
-        'Expected: ' + APP.columns.join(', ') + '.<br>Found: ' +
+        'Expected: ' + activeColumns().join(', ') + '.<br>Found: ' +
         rows[0].map(norm).filter(Boolean).join(', ') + '.');
     return;
   }
@@ -803,7 +1123,7 @@ async function uploadTable(file) {
   if (unknownQuant)
     bits.push(`${unknownQuant} cell(s) had a value not offered by its dropdown ` +
               'and were left blank.');
-  const missing = APP.columns.filter(c => !matched.some(m => m.col === c));
+  const missing = activeColumns().filter(c => !matched.some(m => m.col === c));
   if (missing.length) bits.push(`No column in the file for: ${missing.join(', ')}.`);
 
   say(ignored.length || unknownQuant || missing.length ? 'warn' : 'ok', bits.join('<br>'));
@@ -1026,6 +1346,7 @@ document.addEventListener('keydown', e => {
 /* ── wire up ───────────────────────────────────────────────────────────── */
 renderHeader();
 renderChoices();
+renderQcPanel();
 renderSamples();
 renderBioinformatics();
 dropEmptySections();
