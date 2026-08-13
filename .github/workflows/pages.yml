@@ -1,0 +1,65 @@
+name: Deploy to GitHub Pages
+
+# WHY THIS DOES NOT REBUILD
+#
+# nextseq-samplesheet-generator rebuilds itself here and fails the deploy if the
+# committed output is stale. We cannot: build.py reads the 20 source workbooks
+# from the lab share and the service catalog from data/reference/services.csv,
+# and that catalog carries PRICES, so it is deliberately never committed.
+# A runner has neither.
+#
+# So the built site is pushed to the gh-pages branch from a machine that has
+# the share, after `python build.py` has passed its checks there — including
+# the check that no price reached a page. This workflow only serves what that
+# build produced.
+#
+# It exists at all because it is the one way to publish without an API call:
+# pushing this file is enough to create the Pages site.
+
+on:
+  push:
+    branches: [gh-pages]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+
+      # A stray data file or script on gh-pages would be served to the world.
+      # build.py checks this locally; check it again here, where it is the last
+      # chance before the site is public.
+      - name: Refuse to publish anything but pages and assets
+        run: |
+          bad=$(find . -type f -not -path './.git/*' \
+                  -not -name '*.html' -not -name '*.css' -not -name '*.js' \
+                  -not -name '*.jpg' -not -name '*.png' -not -name '*.svg' \
+                  -not -name '*.ico' -not -name '.nojekyll')
+          if [ -n "$bad" ]; then
+            echo "::error::these are not pages or assets:"; echo "$bad"; exit 1
+          fi
+          echo "$(find . -name index.html -not -path './.git/*' | wc -l) pages"
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - id: deployment
+        uses: actions/deploy-pages@v4
