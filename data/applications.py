@@ -204,6 +204,13 @@ APPLICATIONS = [
     dict(slug="spatial-transcriptomics", site=SITE + "spatial-transcriptomics/", name="Spatial transcriptomics",
          status=BUILD, analysis=SPATIAL,
          workbook="Spatial-electronic_2025.xlsx", root=FORMS,
+         # Nitsan, 2026-08-16. Same reasoning as 10X scRNA-seq: a Visium HD
+         # library is read at a fixed length on a 100-cycle kit, and the run
+         # parameters follow the chemistry. These apply to the Visium kits
+         # only — CosMx is imaged on the instrument and never reaches a flow
+         # cell at all, so it never sees these questions whatever they say.
+         flowcell_cycles=100,
+         run_settings_from_kit=True,
          # Nitsan, 2026-08-11. REPLACES the workbook's eight Visium/CosMx
          # variants outright — the FFPE 11mm, PFA-fixed and fresh/frozen options
          # are no longer offered. `catalog` is the canonical service each kit
