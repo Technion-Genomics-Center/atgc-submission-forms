@@ -57,7 +57,6 @@ function field(f) {
   const wrap = document.createElement('div');
   wrap.className = 'field';
   wrap.dataset.field = f.id;
-  const help = f.help ? `<span class="help" title="${f.help}">?</span>` : '';
   const link = f.link
     ? `<p class="hint"><a href="${f.link.href}" target="_blank" ` +
       `rel="noopener">${f.link.text} &nearr;</a></p>`
@@ -66,9 +65,11 @@ function field(f) {
     ? `<select id="f-${f.id}"><option value=""></option>` +
       f.options.map(o => `<option>${o}</option>`).join('') + '</select>'
     : `<input type="${f.type}" id="f-${f.id}">`;
+  /* Help is a visible line, not a "?" tooltip. See renderChoices() for why. */
   wrap.innerHTML =
-    `<label>${f.label}${help}${control}</label>` +
-    (f.hint ? `<p class="hint">${f.hint}</p>` : '') + link;
+    `<label>${f.label}${control}</label>` +
+    [f.help, f.hint].filter(Boolean)
+      .map(t => `<p class="hint">${t}</p>`).join('') + link;
   return wrap;
 }
 
@@ -134,15 +135,23 @@ function renderChoices() {
     const wrap = document.createElement('div');
     wrap.className = 'field';
     wrap.dataset.field = id;
-    const h = help ? `<span class="help" title="${help}">?</span>` : '';
+    /* Help is a visible line under the field, NOT a "?" tooltip.
+     *
+     * The "?" was inside the <label>, and the <label> also wraps the <select>.
+     * So clicking it did not show help — it activated the label and opened the
+     * dropdown. The only way to reach the text was to hover and wait for the
+     * OS tooltip, which never happens on a phone and rarely on a desktop. An
+     * affordance that promises help and opens a dropdown instead is worse than
+     * no affordance, so the text is simply shown. */
     wrap.innerHTML =
-      `<label>${label}${h}<select id="c-${id}">` +
+      `<label>${label}<select id="c-${id}">` +
       '<option value=""></option>' +
       opts.map(o => {
         const val = typeof o === 'string' ? o : o.label;
         return `<option${val === dflt ? ' selected' : ''}>${val}</option>`;
       }).join('') +
-      '</select></label>';
+      '</select></label>' +
+      (help ? `<p class="hint">${help}</p>` : '');
     box.appendChild(wrap);
     return wrap;
   };
