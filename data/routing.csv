@@ -35,3 +35,5 @@ user-prepared,User-prepared library sequencing,Emerson,linde@technion.ac.il,nits
 user-prepared,User-prepared library sequencing,Medicine (Rappaport),linde@technion.ac.il,nitsanf@technion.ac.il
 mirna-seq,miRNA-seq,Emerson,linde@technion.ac.il,nitsanf@technion.ac.il
 mirna-seq,miRNA-seq,Medicine (Rappaport),linde@technion.ac.il,nitsanf@technion.ac.il
+illumina-scrna-seq,Illumina scRNA-seq,Emerson,,
+illumina-scrna-seq,Illumina scRNA-seq,Medicine (Rappaport),linde@technion.ac.il,nitsanf@technion.ac.il

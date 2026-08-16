@@ -58,7 +58,8 @@ SITE_BIOINFORMATICS = SITE + "bioinformatics/"
 # accent of the group the researcher just came from, so the page reads as a
 # continuation of the site rather than a separate tool.
 APP_GROUPS = {
-    "transcriptomics": ['rnaseq', 'mirna-seq', 'scrna-seq-10x', 'spatial-transcriptomics'],
+    "transcriptomics": ['rnaseq', 'mirna-seq', 'scrna-seq-10x', 'illumina-scrna-seq',
+                        'spatial-transcriptomics'],
     "genomics": ['amplicon-seq', 'dna-seq', 'exome-seq', 'nanopore', 'metagenomics-16s-18s', 'shotgun-metagenomics'],
     "epigenomics": ['chip-seq-cut-and-run', 'rrbs', 'infinium-methylation'],
     "additional": ['cell-line-authentication', 'extraction', 'dna-rna-quality-quantity', 'olink-reveal', 'user-prepared'],
@@ -200,6 +201,29 @@ APPLICATIONS = [
          primary_analysis=dict(
              label="Do you require primary analysis (CellRanger)?",
              catalog="Primary analysis- CellRanger")),
+
+    # PH-24 / PH-25. `SC PIPseq_Illumina` in the old project tree is really
+    # Illumina scRNA-seq; it becomes its own application rather than a variant
+    # of the 10X form, and gets its own project folder. Received by Medicine
+    # (Rappaport) — data/routing.csv leaves Emerson blank.
+    dict(slug="illumina-scrna-seq", site=SITE + "single-cell-transcriptomics/",
+         name="Illumina scRNA-seq", status=BUILD, analysis=SCRNA,
+         # No workbook of its own — the service is new. The 10X form is the
+         # right layout: same question (how many cells, how viable), same
+         # sample table. The KITS are not shared, and come from
+         # data/form_kits.csv, which wins outright over anything the borrowed
+         # Setting sheet lists.
+         workbook=None,
+         layout_from="sc10X-electronic_2025.xlsx", root=FORMS,
+         # Same reasoning as 10X (doc 05 §20a): the read configuration is fixed
+         # by the kit and set by the lab, so the researcher is not asked.
+         flowcell_cycles=100,
+         run_settings_from_kit=True,
+         # doc 05 §3.1 — the scRNA set, the same one 10X uses. CellRanger is
+         # 10X's own software and is NOT offered here; Illumina libraries are
+         # processed with Illumina's pipeline, so there is no primary_analysis
+         # entry. Ask before adding one.
+         ),
 
     dict(slug="spatial-transcriptomics", site=SITE + "spatial-transcriptomics/", name="Spatial transcriptomics",
          status=BUILD, analysis=SPATIAL,

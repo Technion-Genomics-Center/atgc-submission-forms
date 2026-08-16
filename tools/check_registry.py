@@ -19,15 +19,25 @@ from data.applications import (APPLICATIONS, BUILD, MERGED, WITHDRAWN,
 from survey_workbooks import workbooks
 
 # doc 05 §12 buckets, and what they add up to:
-#   §12.1  panel-bearing            12  (11 existing workbooks + the new shotgun form)
+#   §12.1  panel-bearing            13  (11 existing workbooks, shotgun, Illumina scRNA-seq)
 #   §12.2  question, but no panel    2  (miRNA-seq, Nanopore)
 #   §12.3  question dropped          1  (Extraction)
 #   §12.4  withdrawn or merged       4  (CEL-seq2, Infinium, RNAseq-extr, Metagenomics-extr)
 #   §12.5  no question at all        2  (CLA, DNA/RNA Q&Q) — Infinium withdrawn
-# Published pages = 12 + 2 + 1 + 2 = 17, from 20 existing workbooks (20 - 3
-# not built = 17) plus the one new shotgun form.
-EXPECTED_PANEL = 12
-EXPECTED_BUILT_PAGES = 17   # Infinium withdrawn 2026-08-12
+# Published pages = 13 + 2 + 1 + 2 = 18, from 20 existing workbooks (20 - 3
+# not built = 17) plus two forms with no workbook of their own: shotgun, which
+# borrows the DNA-seq layout, and Illumina scRNA-seq, which borrows 10X's.
+#
+# Qubit is NOT here. PH-12/PH-24 say it becomes an application eventually;
+# Nitsan pulled it from this round on 2026-08-16, so it has no slug, no page and
+# no routing row. Adding it later means +1 built page and no change to the panel
+# count, since quantification has no analysis.
+#
+# These are not a tally of the registry — that would make the check agree with
+# itself. They are doc 05 §12's numbers, and a mismatch means the registry and
+# the spec have drifted. Move them only alongside the doc.
+EXPECTED_PANEL = 13         # + Illumina scRNA-seq (PH-25), 2026-08-16
+EXPECTED_BUILT_PAGES = 18   # + Illumina scRNA-seq (PH-25), 2026-08-16
 EXPECTED_EXISTING_WORKBOOKS = 20   # what the survey walks
 
 failures = []
