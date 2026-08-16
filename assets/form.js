@@ -732,9 +732,28 @@ function validate() {
     if (el) el.classList.toggle('is-error', bad);
   };
 
+  /* A question the form has taken away cannot be answered, so it must not
+   * block export.
+   *
+   * CosMx hides the flow cell and the number of flow cells — it is imaged on
+   * the instrument and never sequenced — and export was still demanding a flow
+   * cell, naming a field that was nowhere on the page. Unfixable by the
+   * researcher and impossible to understand.
+   *
+   * The rule is general, not a CosMx special case: every question this form
+   * hides for any reason stops being required at the same moment. The analysis
+   * panel already worked this way; `need` did not. Anything that hides a field
+   * from now on inherits the correct behaviour for free. */
+  const hiddenField = wrap => !wrap || !!wrap.closest('[hidden]');
+
   const need = (id, label) => {
     const el = $('#c-' + id);
     if (!el) return;
+    const wrap = document.querySelector(`[data-field="${id}"]`);
+    if (hiddenField(wrap)) {
+      if (wrap) wrap.classList.remove('is-error');
+      return;
+    }
     const bad = !el.value;
     mark(`[data-field="${id}"]`, bad);
     if (bad) problems.push(label);
@@ -745,9 +764,14 @@ function validate() {
   if (labBad) problems.push('Which ATGC lab you are submitting to');
 
   if (APP.protocol_choice) {
+    const wrap = document.querySelector('[data-field="protocol"]');
     const picked = document.querySelector('input[name="protocol"]:checked');
-    document.querySelector('[data-field="protocol"]').classList.toggle('is-error', !picked);
-    if (!picked) problems.push(APP.protocol_choice.label);
+    if (hiddenField(wrap)) {
+      wrap.classList.remove('is-error');
+    } else {
+      wrap.classList.toggle('is-error', !picked);
+      if (!picked) problems.push(APP.protocol_choice.label);
+    }
   }
   need('libprep', 'Library preparation');
   need('flowcell', 'Flow cell');
