@@ -489,6 +489,34 @@ def build_spec(app, surveyed):
         vocab.pop("Nextseq", None)
         vocab.pop("RunType", None)
 
+    # Nitsan, 2026-08-16. Some applications have a read configuration fixed by
+    # the kit, so the researcher is being asked to choose something they cannot
+    # choose. 10X libraries are read at a set length on a 100-cycle kit; the
+    # lab sets single/paired and the read structure from the chemistry, not
+    # from a preference. Offering the full flow-cell list and an SE/PE dropdown
+    # invites a wrong answer that staff then have to undo.
+    cycles = app.get("flowcell_cycles")
+    if cycles and vocab.get("FlowCell"):
+        before = len(vocab["FlowCell"])
+        # endswith, not a regex: every catalog label ends "<n> cycles",
+        # and a substring match would let "300M 600 cycles" through a
+        # search for 600.
+        want = f"{cycles} cycles"
+        vocab["FlowCell"] = [o for o in vocab["FlowCell"]
+                             if o["label"].endswith(want)]
+        if not vocab["FlowCell"]:
+            raise SystemExit(
+                f"{app['slug']}: flowcell_cycles={cycles} matched no catalog "
+                f"flow cell. The list has {before} entries; check the wording.")
+        report["added"].append(
+            f"flow cells limited to {cycles} cycles "
+            f"({len(vocab['FlowCell'])} of {before}) — fixed by the kit")
+
+    if app.get("run_settings_from_kit"):
+        vocab.pop("RunMode", None)
+        report["added"].append(
+            "run mode removed — single/paired follows the kit, set by the lab")
+
     return {
         "slug": app["slug"],
         "name": app["name"],

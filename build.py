@@ -155,6 +155,33 @@ def check_no_prices(paths):
     return bad
 
 
+def check_control_chars():
+    """Stray control bytes in source — the ones a terminal renders invisibly.
+
+    An 0x08 (backspace) once landed inside `re.compile(rf"\b{n} cycles")`
+    where the escape should have stayed literal. The regex then matched
+    nothing, and `grep` printed the line looking perfectly correct, because a
+    backspace erases the preceding character on the way to the screen. Two
+    rounds of debugging went into finding a byte that was on the screen the
+    whole time.
+
+    Tab, newline and carriage return are the only control characters a source
+    file has any business containing.
+    """
+    bad = []
+    for pat in ("*.py", "assets/*.js", "assets/*.css", "tools/*.py",
+                "data/*.py", "template.html"):
+        for f in ROOT.glob(pat):
+            if "__pycache__" in f.parts:
+                continue
+            for n, line in enumerate(f.read_text(encoding="utf-8").splitlines(), 1):
+                for c in line:
+                    if ord(c) < 32 and c != "	":
+                        bad.append((f.relative_to(ROOT), n, hex(ord(c))))
+                        break
+    return bad
+
+
 def check_js_syntax(path):
     """Catch a quoted string broken across a newline.
 
@@ -295,6 +322,12 @@ def main():
     for fname, n, q, text in js_problems[:10]:
         print(f"  FAIL {fname}:{n} unbalanced {q} -> {text}")
     failures += len(js_problems)
+
+    ctrl = check_control_chars()
+    print(f"control bytes : {len(ctrl)} invisible character(s) in source")
+    for f, n, code in ctrl[:10]:
+        print(f"  FAIL {f}:{n} contains {code}")
+    failures += len(ctrl)
 
     # A recipient with no TLD looks fine in a spreadsheet and bounces in a mail
     # client, taking the submission with it. Check the shape of every address.

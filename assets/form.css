@@ -80,13 +80,6 @@ textarea { min-height: 4.5rem; resize: vertical; }
 
 .hint { margin: .25rem 0 0; font-size: var(--fs-small); color: var(--ink-soft); }
 
-.help {
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 1.05rem; height: 1.05rem; margin-left: .3rem;
-  border-radius: 50%; background: var(--rule); color: var(--navy);
-  font-size: .7rem; font-weight: 700; cursor: help;
-}
-
 /* ── quote import — deliberately understated (doc 03) ─────────────────── */
 .quote {
   margin-top: 1rem; padding: .6rem .8rem;

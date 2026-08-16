@@ -189,6 +189,11 @@ APPLICATIONS = [
          # size variants (2/4/6/8 samples, and a T10 24-sample); the researcher
          # picks the prep, staff pick the size when quoting.
          extra_preps=["Illumina/Fluent scRNA-seq library prep"],
+         # Nitsan, 2026-08-16. 10X libraries are read at a fixed length on a
+         # 100-cycle kit, and single/paired follows the chemistry. Both were
+         # being asked as if the researcher chose them.
+         flowcell_cycles=100,
+         run_settings_from_kit=True,
          # doc 05 §3.1 — CellRanger is a priced pipeline, not a bespoke
          # analysis, so it is asked separately and is never gated by the
          # consultation. Unlike Spatial's SpaceRanger it applies to every kit.
