@@ -182,6 +182,44 @@ def check_control_chars():
     return bad
 
 
+def check_unpriced_kits(specs):
+    """Kits the form offers that the catalog cannot yet put a number against.
+
+    A researcher can pick these and submit perfectly well; the lab simply
+    cannot quote them until Module 0 fills the price in. That is worth saying
+    out loud on every build rather than living in a code comment, which is
+    where two CosMx panels were about to sit.
+
+    Reads only the NAME and whether the price cell is empty. No price is ever
+    read into a variable here, let alone rendered — see D12.
+    """
+    import csv
+    priced, known = set(), set()
+    path = ROOT.parent / "data" / "reference" / "services.csv"
+    with open(path, encoding="utf-8-sig") as fh:
+        for row in csv.DictReader(fh):
+            if row.get("active") != "1":
+                continue
+            known.add(row["description"])
+            if row.get("price_technion", "").strip() or                row.get("price_non_technion", "").strip():
+                priced.add(row["description"])
+
+    # Read the REGISTRY, not the built spec: catalog names are deliberately
+    # not shipped to the page, so the spec has no idea what a kit bills as.
+    from data.applications import APPLICATIONS
+
+    offered = {s["slug"] for s in specs}
+    out = {}
+    for app in APPLICATIONS:
+        if app["slug"] not in offered:
+            continue
+        for kit in app.get("library_kits") or []:
+            cat = kit.get("catalog")
+            if cat and cat in known and cat not in priced:
+                out.setdefault(cat, []).append(app["slug"])
+    return out
+
+
 def check_js_syntax(path):
     """Catch a quoted string broken across a newline.
 
@@ -394,6 +432,11 @@ def main():
     for spec in specs:
         for term in spec["report"].get("needs_catalog", []):
             pending.setdefault(term, []).append(spec["slug"])
+    unpriced = check_unpriced_kits(specs)
+    print(f"unpriced kits : {len(unpriced)} offered kit(s) the catalog cannot quote")
+    for cat, slugs in unpriced.items():
+        print(f"  WARN {cat} - on {', '.join(slugs)}; submits fine, cannot be quoted")
+
     if pending:
         print(f"catalog gaps  : {len(pending)} offered service(s) with no catalog entry")
         for term, slugs in sorted(pending.items()):

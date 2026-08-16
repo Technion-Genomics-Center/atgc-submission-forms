@@ -224,16 +224,32 @@ APPLICATIONS = [
                   # does not exist yet and has NO price. Needs adding via
                   # Module 0 before this kit can be quoted.
                   needs_catalog_entry=True, needs_price=True),
-             # Priced identically; the species split exists so the lab pulls
-             # the right kit. One catalog entry, two form options.
-             dict(label="CosMx x1000 mouse", technology="imaging",
-                  catalog="CosMx 1000plex [2 slides]", lab_kit="mouse"),
-             dict(label="CosMx x1000 human", technology="imaging",
-                  catalog="CosMx 1000plex [2 slides]", lab_kit="human"),
-             dict(label="CosMx x6000", technology="imaging",
-                  catalog="CosMx 6000plex [2 slides]"),
-             dict(label="CosMx WT human", technology="imaging",
-                  catalog="CosMx WTS [2 slides]", lab_kit="human"),
+             # Nitsan, 2026-08-16. The six real panels, replacing four options
+             # that named a plex count and a species but not the panel — a
+             # researcher choosing "CosMx x1000 mouse" had not said whether
+             # they wanted Universal or Neuroscience, which are different kits
+             # at different prices.
+             #
+             # `label` is the catalog name minus its size suffix, the same rule
+             # every other kit here follows, so the name on the form is the
+             # name on the quote. Kit part numbers live in
+             # ProjectHub/data/libprep_kits.csv; the catalog is the authority
+             # for what a submission bills as.
+             dict(label="CosMx Human Universal 1K", technology="imaging",
+                  catalog="CosMx Human Universal 1K [2 slides]"),
+             dict(label="CosMx Human Discovery 6K", technology="imaging",
+                  catalog="CosMx Human Discovery 6K [2 slides]"),
+             dict(label="CosMx Human Whole Transcriptome", technology="imaging",
+                  catalog="CosMx Human Whole Transcriptome [2 slides]"),
+             dict(label="CosMx Mouse Universal 1K", technology="imaging",
+                  catalog="CosMx Mouse Universal 1K [2 slides]"),
+             # Catalog entry exists, both prices are still blank.
+             dict(label="CosMx Mouse Neuroscience 1K", technology="imaging",
+                  catalog="CosMx Mouse Neuroscience 1K [2 slides]",
+                  needs_price=True),
+             dict(label="CosMx Mouse Whole Transcriptome WTX", technology="imaging",
+                  catalog="CosMx Mouse Whole Transcriptome WTX [2 slides]",
+                  needs_price=True),
          ],
          # SpaceRanger is 10X Visium software, so the primary/full split
          # applies to the Visium HD kits only. CosMx primary analysis runs on
