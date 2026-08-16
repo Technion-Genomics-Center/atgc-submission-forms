@@ -59,16 +59,19 @@ def build():
         sys.exit("build failed — nothing published")
 
 
-def live_fingerprint():
-    """Whatever version string the live page is currently serving."""
+def is_live(rel, want):
+    """Is the live site serving exactly these bytes for this file?
+
+    Byte comparison of a file we KNOW changed, rather than a version string.
+    The earlier version fingerprinted form.js, which is wrong whenever the
+    change is in the page rather than the script.
+    """
     try:
-        with urllib.request.urlopen(LIVE + "rnaseq/", timeout=20) as f:
-            html = f.read().decode("utf-8", "replace")
-    except Exception as e:                                  # noqa: BLE001
-        return f"unreachable: {e}"
-    import re
-    m = re.search(r"form\.js\?v=([a-f0-9]+)", html)
-    return m.group(1) if m else "none"
+        with urllib.request.urlopen(LIVE + rel.replace("\\", "/"), timeout=20) as f:
+            got = f.read()
+    except Exception:                                       # noqa: BLE001
+        return False
+    return got.replace(b"\r\n", b"\n") == want.replace(b"\r\n", b"\n")
 
 
 def main():
@@ -85,17 +88,17 @@ def main():
         sys.exit("refusing to publish, these are not pages or assets:\n  " +
                  "\n  ".join(str(p.relative_to(DIST)) for p in bad))
 
-    before = live_fingerprint()
-    want = None
-    import re
-    m = re.search(r"form\.js\?v=([a-f0-9]+)",
-                  (DIST / "rnaseq" / "index.html").read_text(encoding="utf-8"))
-    want = m.group(1) if m else None
-    print(f"live now : {before}\nbuilt    : {want}")
-    if before == want:
-        print("nothing to publish — the live site already serves this build")
-        return
-
+    # Deliberately NO early exit on a fingerprint.
+    #
+    # This used to compare form.js?v= against the live page and stop if they
+    # matched. That is wrong whenever the change is in a page rather than in a
+    # script: editing data/applications.py rewrote six dropdown options and
+    # left form.js untouched, so the publisher announced "nothing to publish"
+    # about a build that genuinely differed. A publisher that can be fooled
+    # into skipping is worse than none, because it is believed.
+    #
+    # git decides what changed, over the real file set. The live check then
+    # follows git rather than guessing.
     if WORKTREE.exists():
         run("git", "worktree", "remove", "--force", str(WORKTREE), check=False)
         shutil.rmtree(WORKTREE, ignore_errors=True)
@@ -114,9 +117,14 @@ def main():
         (WORKTREE / ".nojekyll").touch()
 
         run("git", "add", "-A", cwd=WORKTREE)
-        if not run("git", "status", "--porcelain", cwd=WORKTREE):
+        status = run("git", "status", "--porcelain", cwd=WORKTREE)
+        if not status:
             print("gh-pages already identical — nothing to push")
             return
+        changed = [ln[3:].strip().strip('"') for ln in status.splitlines()
+                   if not ln.lstrip().startswith("D")]
+        print(f"{len(changed)} file(s) changed: " + ", ".join(changed[:6])
+              + (" …" if len(changed) > 6 else ""))
         run("git", "-c", "core.autocrlf=false", "commit", "-q",
             "-m", args.message, cwd=WORKTREE)
         run("git", "push", "-q", "origin", f"HEAD:{BRANCH}", cwd=WORKTREE)
@@ -124,12 +132,18 @@ def main():
     finally:
         run("git", "worktree", "remove", "--force", str(WORKTREE), check=False)
 
-    print("waiting for the deploy", end="", flush=True)
+    # Watch a file git says actually changed, and compare it byte for byte.
+    probe = next((c for c in changed if c.endswith((".html", ".js", ".css"))), None)
+    if not probe or not (DIST / probe).exists():
+        print("pushed; no text file to verify against")
+        return
+    want = (DIST / probe).read_bytes()
+    print(f"waiting for the deploy (watching {probe})", end="", flush=True)
     for _ in range(40):                     # up to ~10 minutes
         time.sleep(15)
         print(".", end="", flush=True)
-        if live_fingerprint() == want:
-            print(f"\nLIVE — {LIVE} now serves {want}")
+        if is_live(probe, want):
+            print(f"\nLIVE — {LIVE} now serves the build just made")
             return
     sys.exit("\nthe deploy has not appeared yet. Check the Actions tab; the "
              "push itself succeeded.")
