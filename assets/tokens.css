@@ -64,7 +64,7 @@
   --fs-section: 0.875rem;    /* 14px, uppercase, letter-spaced */
   --fs-body:    1rem;
   --fs-small:   0.875rem;
-  --fs-tiny:    0.75rem;     /* 12px — explanatory help under a field */
+  --fs-tiny:    0.78125rem;  /* 12.5px — explanatory help under a field */
 
   --gap:    1rem;
   --shadow: 0 1px 3px rgba(17, 41, 84, .08);

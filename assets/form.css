@@ -61,6 +61,13 @@ section h2::after {
 }
 
 label { display: block; font-size: var(--fs-small); color: var(--ink-soft); }
+/* A field's own label is bold; the help beneath it is not, and is a size
+ * smaller. That is the whole hierarchy — question, then aside, then answer.
+ * The analysis panel and the sign-off were already 600, so this makes the
+ * rest of the form match them rather than introducing a new weight.
+ * `.field > label` deliberately, NOT every label: a radio option is a value,
+ * not a question, and must stay regular weight. */
+.field > label, .table-tools > label { font-weight: 600; }
 label > span.req { color: var(--error); margin-left: .15rem; }
 
 input, select, textarea {
@@ -295,7 +302,9 @@ th         { background: var(--navy); }
 .address-phone a:hover { text-decoration: underline; }
 
 /* ── a small set of exclusive options ─────────────────────────────────────── */
-.grouplabel { display: block; font-size: var(--fs-small); color: var(--muted); }
+/* The radio/checkbox equivalent of a field label — same weight as one. */
+.grouplabel { display: block; font-size: var(--fs-small); color: var(--muted);
+  font-weight: 600; }
 .radios { display: flex; gap: 1rem; margin-top: .35rem; flex-wrap: wrap; }
 .radio {
   display: inline-flex; align-items: center; gap: .35rem;
