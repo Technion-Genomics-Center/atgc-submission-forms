@@ -68,8 +68,8 @@ function field(f) {
   /* Help is a visible line, not a "?" tooltip. See renderChoices() for why. */
   wrap.innerHTML =
     `<label>${f.label}${control}</label>` +
-    [f.help, f.hint].filter(Boolean)
-      .map(t => `<p class="hint">${t}</p>`).join('') + link;
+    (f.help ? `<p class="hint hint-help">${f.help}</p>` : '') +
+    (f.hint ? `<p class="hint">${f.hint}</p>` : '') + link;
   return wrap;
 }
 
@@ -151,7 +151,7 @@ function renderChoices() {
         return `<option${val === dflt ? ' selected' : ''}>${val}</option>`;
       }).join('') +
       '</select></label>' +
-      (help ? `<p class="hint">${help}</p>` : '');
+      (help ? `<p class="hint hint-help">${help}</p>` : '');
     box.appendChild(wrap);
     return wrap;
   };
