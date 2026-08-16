@@ -79,6 +79,9 @@ textarea { min-height: 4.5rem; resize: vertical; }
 .is-warn  input, .is-warn  select, .is-warn  textarea { border-color: var(--warn);  background: var(--warn-bg); }
 
 .hint { margin: .25rem 0 0; font-size: var(--fs-small); color: var(--ink-soft); }
+/* Explanatory help sits below the shorter field hints: it is a full
+ * sentence and should read as an aside, not compete with the label. */
+.hint-help { font-size: var(--fs-tiny); }
 
 /* ── quote import — deliberately understated (doc 03) ─────────────────── */
 .quote {
