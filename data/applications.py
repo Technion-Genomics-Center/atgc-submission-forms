@@ -1,17 +1,38 @@
 # -*- coding: utf-8 -*-
-"""The application registry — one entry per form the site will publish.
+"""The application registry — the CONDITIONAL RULES half.
+
+Split in two on 2026-08-17, because it was doing two jobs at once:
+
+    data/applications.csv   the FLAT FACTS — slug, name, status, group, site
+                            link, source workbook. Git-tracked, editable in
+                            Excel, and safe for CatalogAdmin to write.
+    data/applications.py    THIS FILE — only the rules that are conditional:
+                            which analysis panel expands and when, which kits a
+                            form offers, which questions an application does not
+                            ask. Hand-edited, and still the only place doc 05's
+                            decisions are written down.
+
+The mixture was why FormAdmin had to print a block of Python and ask a human to
+paste it, which made every new service end with a step only one person could
+do. Adding an application is now a CSV row plus, if it needs any, a RULES
+entry. The two are joined by `key` — the slug for a published application, and
+a stable name-derived key for the withdrawn and merged ones, which have no slug.
 
 Structure comes from the workbooks (see tools/survey_workbooks.py); the
-DECISIONS here come from docs/05_Analysis_Intake_Spec.md and are not derivable
-from any file. Keep this the only place they are written down: build.py reads
-it, and doc 05 §12 is the prose that explains it.
+DECISIONS come from docs/05_Analysis_Intake_Spec.md and are not derivable from
+any file. doc 05 §12 is the prose that explains them.
 
 `slug` is a PUBLIC CONTRACT. The website links to /SubmissionForm/<slug>/ and
 those links end up in emails and bookmarks. Never rename one; add to
-`slug_aliases` instead so the old URL keeps working.
+`SLUG_ALIASES` instead so the old URL keeps working. This survived the split
+unchanged and must survive the next one.
 """
 
 from __future__ import annotations
+
+import csv
+import io
+import os
 
 # ── how each application is treated ─────────────────────────────────────────
 BUILD = "build"            # a published form
@@ -35,8 +56,26 @@ RRBS = "rrbs"                        # §8
 OLINK = "olink"                      # §9
 USER_PREPARED = "user_prepared"      # §10 — dropdown reusing the sets above
 
-WEBSITE = r"Y:\LAB\TGC_website\ATGC_website_2025\Applications"
-FORMS = r"Y:\LAB\Forms\Submission_forms"
+# Where the source workbooks live on the lab share. READ-ONLY, both of them.
+#
+# These were spelled out as `Y:\LAB\...` until the split. That is the exact
+# defect D23 exists to stop: the same storage is Y: on some machines and Z: on
+# others, so a literal drive letter is wrong for half the team. Resolved
+# through atgc.config, which works the share out from where the code is
+# running. The CSV stores the token WEBSITE or FORMS, never a path.
+def _share(*parts):
+    import sys
+    root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    if root not in sys.path:
+        sys.path.insert(0, root)
+    from atgc import config
+    return config.under_storage(*parts)
+
+
+WEBSITE = _share("LAB", "TGC_website", "ATGC_website_2025", "Applications")
+FORMS = _share("LAB", "Forms", "Submission_forms")
+
+ROOTS = {"WEBSITE": WEBSITE, "FORMS": FORMS}
 
 # The public site, read off https://atgc.net.technion.ac.il/applications/ on
 # 2026-08-11. `site` on each entry is the page the form links to for sample
@@ -57,15 +96,11 @@ SITE_BIOINFORMATICS = SITE + "bioinformatics/"
 # Section colours, from the website's applications.html. A form takes the
 # accent of the group the researcher just came from, so the page reads as a
 # continuation of the site rather than a separate tool.
-APP_GROUPS = {
-    "transcriptomics": ['rnaseq', 'mirna-seq', 'scrna-seq-10x', 'illumina-scrna-seq',
-                        'spatial-transcriptomics'],
-    "genomics": ['amplicon-seq', 'dna-seq', 'exome-seq', 'nanopore', 'metagenomics-16s-18s', 'shotgun-metagenomics'],
-    "epigenomics": ['chip-seq-cut-and-run', 'rrbs', 'infinium-methylation'],
-    "additional": ['cell-line-authentication', 'extraction', 'dna-rna-quality-quantity', 'olink-reveal', 'user-prepared'],
-}
-
-GROUP_OF = {slug: g for g, slugs in APP_GROUPS.items() for slug in slugs}
+#
+# APP_GROUPS and GROUP_OF are now derived from applications.csv's `group` and
+# `group_order` columns — see _load_groups() at the foot of this file. They
+# used to be a second literal list, and keeping it in step with APPLICATIONS
+# was one of the steps a new application could silently miss.
 
 # Where samples are physically delivered. Shown on the form for whichever
 # lab the researcher is submitting to.
@@ -171,11 +206,9 @@ def _load_form_kits():
 FORM_PREPS = _load_form_kits()
 
 
-APPLICATIONS = [
+RULES = {
     # ── sequencing forms with an analysis panel ─────────────────────────────
-    dict(slug="rnaseq", site=SITE + "rna-seq/", name="RNA-seq", status=BUILD, analysis=RNASEQ,
-         workbook="RNA-seq additional files/RNAseq-electronic 2025.xlsx",
-         root=WEBSITE,
+    "rnaseq": dict(analysis=RNASEQ,
          # doc 05 §11 — RNAseq-extraction folded in behind a Yes/No.
          extraction="rna",
          # Nitsan, 2026-08-12. The workbook offered one vague "[rRNA removal]"
@@ -184,8 +217,7 @@ APPLICATIONS = [
          # quote can then pick the one they were quoted.
          ),
 
-    dict(slug="scrna-seq-10x", site=SITE + "single-cell-transcriptomics/", name="10X scRNA-seq", status=BUILD, analysis=SCRNA,
-         workbook="sc10X-electronic_2025.xlsx", root=FORMS,
+    "scrna-seq-10x": dict(analysis=SCRNA,
          # Nitsan, 2026-08-12. The workbook predates it. Catalog carries five
          # size variants (2/4/6/8 samples, and a T10 24-sample); the researcher
          # picks the prep, staff pick the size when quoting.
@@ -206,15 +238,12 @@ APPLICATIONS = [
     # Illumina scRNA-seq; it becomes its own application rather than a variant
     # of the 10X form, and gets its own project folder. Received by Medicine
     # (Rappaport) — data/routing.csv leaves Emerson blank.
-    dict(slug="illumina-scrna-seq", site=SITE + "single-cell-transcriptomics/",
-         name="Illumina scRNA-seq", status=BUILD, analysis=SCRNA,
-         # No workbook of its own — the service is new. The 10X form is the
-         # right layout: same question (how many cells, how viable), same
-         # sample table. The KITS are not shared, and come from
-         # data/form_kits.csv, which wins outright over anything the borrowed
-         # Setting sheet lists.
-         workbook=None,
-         layout_from="sc10X-electronic_2025.xlsx", root=FORMS,
+    #
+    # No workbook of its own — the service is new. The 10X form is the right
+    # layout: same question (how many cells, how viable), same sample table.
+    # The KITS are not shared, and come from data/form_kits.csv, which wins
+    # outright over anything the borrowed Setting sheet lists.
+    "illumina-scrna-seq": dict(analysis=SCRNA,
          # Same reasoning as 10X (doc 05 §20a): the read configuration is fixed
          # by the kit and set by the lab, so the researcher is not asked.
          flowcell_cycles=100,
@@ -225,9 +254,7 @@ APPLICATIONS = [
          # entry. Ask before adding one.
          ),
 
-    dict(slug="spatial-transcriptomics", site=SITE + "spatial-transcriptomics/", name="Spatial transcriptomics",
-         status=BUILD, analysis=SPATIAL,
-         workbook="Spatial-electronic_2025.xlsx", root=FORMS,
+    "spatial-transcriptomics": dict(analysis=SPATIAL,
          # Nitsan, 2026-08-16. Same reasoning as 10X scRNA-seq: a Visium HD
          # library is read at a fixed length on a 100-cycle kit, and the run
          # parameters follow the chemistry. These apply to the Visium kits
@@ -299,10 +326,7 @@ APPLICATIONS = [
          # all name the same thing (D6).
          export_catalog_name=True),
 
-    dict(slug="metagenomics-16s-18s", site=SITE + "metagenomics/", name="Metagenomics — 16S / 18S",
-         status=BUILD, analysis=AMPLICON16S,
-         workbook="Metagenomics/Metagenomics-electronicV2_2025.xlsx",
-         root=WEBSITE,
+    "metagenomics-16s-18s": dict(analysis=AMPLICON16S,
          # doc 05 §4.1 — header multi-select drives the per-sample column.
          # Nitsan asked what a mixed project should do. Proposal: the header
          # states what the submission contains, and "Mixed" hands the decision
@@ -318,47 +342,29 @@ APPLICATIONS = [
     # Guidelines come from DNA-seq, not metagenomics: the form is built from the
     # DNA-seq layout and the sample requirements are the DNA-seq ones. The
     # SERVICE is described on the metagenomics page, hence the two links.
-    dict(slug="shotgun-metagenomics", site=SITE + "dna-seq/",
-         service_page=SITE + "metagenomics/", name="Shotgun metagenomics",
-         status=BUILD, analysis=SHOTGUN,
-         workbook=None,
-         layout_from="DNA-seqeucning additional files/DNAseq-electronicV2_2025.xlsx",
-         root=WEBSITE,
-         new_workbook="Shotgun-metagenomics-electronic_2026.xlsx",
+    "shotgun-metagenomics": dict(analysis=SHOTGUN,
          # Quoted and reported under the DNA-seq prep — a new form, not a new
          # catalog service.
          catalog_prep="NEBNext DNA library prep",
          extraction="dna"),
 
-    dict(slug="amplicon-seq", site=SITE + "amplicon-seq/", name="Amplicon-seq", status=BUILD, analysis=AMPLICON,
-         workbook="Amplicon-seq/Amplicon-seq-electronic_2025.xlsx", root=WEBSITE),
+    "amplicon-seq": dict(analysis=AMPLICON),
 
-    dict(slug="dna-seq", site=SITE + "dna-seq/", name="DNA-seq", status=BUILD, analysis=DNASEQ,
-         extraction="dna",
-         workbook="DNA-seqeucning additional files/DNAseq-electronicV2_2025.xlsx",
-         root=WEBSITE),
+    "dna-seq": dict(analysis=DNASEQ, extraction="dna"),
 
-    dict(slug="exome-seq", site=SITE + "exome-seq/", name="Exome-seq", status=BUILD, analysis=EXOME,
-         workbook="Exsome-seq/Exome-seq-electronicV2_2025.xlsx", root=WEBSITE),
+    "exome-seq": dict(analysis=EXOME),
 
-    dict(slug="chip-seq-cut-and-run", site=SITE + "chip-seq/", name="ChIP-seq / Cut&Run",
-         status=BUILD, analysis=CHIP,
+    "chip-seq-cut-and-run": dict(analysis=CHIP,
          # Nitsan, 2026-08-12. One form, but which protocol was run has to be
          # recorded: the kit is the same and the protocols are not, and
          # downstream processing depends on knowing which. BLOCKING, because a
          # submission that does not say is ambiguous the moment it arrives.
          protocol_choice=dict(
-             label="Which protocol?", options=["ChIP-seq", "Cut&Run"]),
-         workbook="ChIP-seq and cut&run additional files/ChIP-seq_Cut&Run-electronic_2025.xlsx",
-         root=WEBSITE),
+             label="Which protocol?", options=["ChIP-seq", "Cut&Run"])),
 
-    dict(slug="rrbs", site=SITE + "dna-methylation/", name="RRBS", status=BUILD, analysis=RRBS,
-         extraction="dna",
-         workbook="Methylation additional files/RRBS-electronic_2025.xlsx",
-         root=WEBSITE),
+    "rrbs": dict(analysis=RRBS, extraction="dna"),
 
-    dict(slug="olink-reveal", site=SITE + "olink_reveal/", name="Olink Reveal", status=BUILD, analysis=OLINK,
-         workbook="Olink Reveal/Olink_reveal-electronicV2_2025.xlsx", root=WEBSITE,
+    "olink-reveal": dict(analysis=OLINK,
          # doc 05 §16.2 — keeps its own plate-based table, no concentration.
          keep_own_table=True,
          # Nitsan, 2026-08-13: the free-text "other" column is not used, and
@@ -367,43 +373,31 @@ APPLICATIONS = [
          no_qc=True),
 
     # The researcher brings a finished library, so there is no prep to choose.
-    dict(slug="user-prepared", no_library_prep=True, no_experimental_group=True,
+    "user-prepared": dict(analysis=USER_PREPARED,
+         no_library_prep=True, no_experimental_group=True,
          # No prep to choose, but the library still gets measured before it
          # goes on a flow cell (Nitsan, 2026-08-12).
-         qc_services=["Qubit measurement", "TapeStation"],
-         site=SITE + "user-prepared-library-sequencing/", name="User-prepared library sequencing",
-         status=BUILD, analysis=USER_PREPARED,
-         workbook="User-prepared library sequencing additional files/User-prepared-electronicV2_2025.xlsx",
-         root=WEBSITE),
+         qc_services=["Qubit measurement", "TapeStation"]),
 
     # ── forms with the question but no panel, doc 05 §12.2 ──────────────────
-    dict(slug="nanopore", site=SITE + "long-read-sequencing/", name="Oxford Nanopore", status=BUILD, analysis=None,
+    "nanopore": dict(analysis=None,
          # Nanopore has its own flow cells and its own run settings — the
          # NextSeq questions do not apply. The library prep still does.
-         no_flowcell=True,
-         workbook="Long read sequencing additional files/Oxford Nanopore-electronic_2025.xlsx",
-         root=WEBSITE),
+         no_flowcell=True),
 
-    dict(slug="mirna-seq", site=SITE + "mirna-seq/", name="miRNA-seq", status=BUILD, analysis=None,
-         extraction="rna",
-         workbook="miRNA-seq additional files/miRNAseq-electronic 2025.xlsx",
-         root=WEBSITE),
+    "mirna-seq": dict(analysis=None, extraction="rna"),
 
     # ── no bioinformatics question at all, doc 05 §12.5 ─────────────────────
-    dict(slug="cell-line-authentication", site=SITE + "cell-line-authentication/", name="Cell-line authentication",
-         status=BUILD, analysis=None, no_analysis_question=True,
+    "cell-line-authentication": dict(analysis=None, no_analysis_question=True,
          # doc 05 §16.3 — normalised naming, but still no experimental group.
          no_experimental_group=True,
          # A lab service, not a sequencing run: the workbook asks only about DNA
          # extraction, and nothing is sequenced, so no prep, flow cell, run mode
          # or flow-cell count belongs on it.
          no_sequencing=True,
-         extraction="dna",
-         workbook="Cell-line authentication additional files/CLA-electronic_2025.xlsx",
-         root=WEBSITE),
+         extraction="dna"),
 
-    dict(slug="dna-rna-quality-quantity", site=SITE + "dna-rna-quality-and-quantity/", name="DNA/RNA quality and quantity",
-         status=BUILD, analysis=None, no_analysis_question=True,
+    "dna-rna-quality-quantity": dict(analysis=None, no_analysis_question=True,
          no_experimental_group=True,
          # This IS the service — measuring. Each instrument is ordered
          # separately and takes a different kit, so each is its own question.
@@ -431,47 +425,23 @@ APPLICATIONS = [
                              "RNA [Prokaryotes]",
                              "High Sensitivity RNA [Prokaryotes]"],
                  }),
-         ),
-         workbook="DNA-RNA quality and quantity additional files/DNA-RNA_Quality_&_Quantity-electronic_2025.xlsx",
-         root=WEBSITE),
-
-    # Nitsan, 2026-08-12: no longer offered.
-    dict(slug=None, name="Infinium methylation", status=WITHDRAWN,
-         workbook="Methylation additional files/Infinium-methylation-electronic_2025.xlsx",
-         root=WEBSITE,
-         note="Service withdrawn. RRBS remains the methylation application."),
+         )),
 
     # doc 05 §12.3 — extraction produces no data to analyse; the bioinformatics
     # question is vestigial and is dropped.
-    dict(slug="extraction", site=SITE + "dna-rna-extraction/", name="DNA / RNA extraction",
-         status=BUILD, analysis=None, no_analysis_question=True,
+    "extraction": dict(analysis=None, no_analysis_question=True,
          # Nothing is sequenced here. The whole service is: extract, and measure
          # what came out. Library prep and flow cell belong to the application
          # that follows, on its own form.
          # Asking "do you require extraction?" on the extraction form is asking
          # someone why they are here. It is always yes.
          no_sequencing=True, extraction="both", extraction_always=True,
-         qc_services=["Qubit measurement", "TapeStation"],
-         workbook="DNA-RNA extraction additional files/Extraction sample submission-electronic_2025.xlsx",
-         root=WEBSITE),
+         qc_services=["Qubit measurement", "TapeStation"]),
 
     # ── not published ───────────────────────────────────────────────────────
-    dict(slug=None, name="CEL-seq2", status=WITHDRAWN,
-         workbook="CEL-Seq2 additional files/CELseq-electronic 2025.xlsx",
-         root=WEBSITE,
-         note="Service withdrawn. Also remove CEL-Seq2 from the LibraryPrep "
-              "vocabulary of the RNA-seq forms."),
-
-    dict(slug=None, name="RNA-seq with extraction", status=MERGED,
-         merged_into="rnaseq",
-         workbook="RNA-seq additional files/RNAseq-extraction-electronic 2025.xlsx",
-         root=WEBSITE),
-
-    dict(slug=None, name="Metagenomics with extraction", status=MERGED,
-         merged_into="metagenomics-16s-18s",
-         workbook="Metagenomics/Metagenomics-extraction-electronicV2_2025.xlsx",
-         root=WEBSITE),
-]
+    # The withdrawn and merged applications carry no rules of their own — the
+    # reason each was withdrawn is a flat fact and lives in the CSV's `note`.
+}
 
 # Superseded by the 16S/18S + Amplicon-seq split (doc 05 §4). Never built, never
 # deleted — it lives on read-only storage.
@@ -479,6 +449,88 @@ SUPERSEDED = ["Amplicon_16S-seq-electronic_2025.xlsx"]
 
 # Old URLs that must keep working if a slug is ever retired.
 SLUG_ALIASES: dict[str, str] = {}
+
+
+# ── the join ────────────────────────────────────────────────────────────────
+APPLICATIONS_CSV = os.path.join(os.path.dirname(__file__), "applications.csv")
+
+
+def _load_applications():
+    """Flat facts from the CSV, conditional rules from RULES above.
+
+    The result is exactly the list this module used to hold literally, in the
+    same order, so nothing downstream had to change. `key` is what joins the
+    two halves: the slug for a published application, and a stable
+    name-derived key for the withdrawn and merged ones, which have no slug.
+
+    A blank cell means "not set", so it becomes None rather than "" — several
+    callers test `a.get("workbook")` for truth and an empty string would read
+    as a workbook that exists.
+    """
+    out = []
+    if not os.path.exists(APPLICATIONS_CSV):
+        raise RuntimeError(
+            "The application registry's flat half is missing: %s. It is "
+            "git-tracked; restore it rather than recreating it by hand."
+            % APPLICATIONS_CSV)
+    with io.open(APPLICATIONS_CSV, encoding="utf-8-sig", newline="") as fh:
+        for r in csv.DictReader(fh):
+            key = (r.get("key") or "").strip()
+            if not key:
+                continue
+            slug = (r.get("slug") or "").strip() or None
+            entry = {
+                "slug": slug,
+                "name": (r.get("name") or "").strip(),
+                "status": (r.get("status") or "").strip(),
+                "root": ROOTS.get((r.get("root") or "").strip()),
+                "workbook": (r.get("workbook") or "").strip() or None,
+            }
+            # `site` and `service_page` are stored as the tail after SITE, so
+            # the public host is written down once (here) rather than 20 times.
+            for field in ("site", "service_page"):
+                tail = (r.get(field) or "").strip()
+                if tail:
+                    entry[field] = tail if "://" in tail else SITE + tail
+            for field in ("layout_from", "new_workbook", "merged_into", "note"):
+                val = (r.get(field) or "").strip()
+                if val:
+                    entry[field] = val
+            entry.update(RULES.get(key, {}))
+            out.append(entry)
+    return out
+
+
+def _load_groups():
+    """Website section per slug, in the order each section lists them.
+
+    Was `APP_GROUPS`, a literal. Now derived from the CSV's `group` and
+    `group_order`, because a new application's section is a flat fact and
+    having to edit a second list was one of the steps that got forgotten.
+    """
+    rows = []
+    with io.open(APPLICATIONS_CSV, encoding="utf-8-sig", newline="") as fh:
+        for r in csv.DictReader(fh):
+            slug = (r.get("slug") or "").strip()
+            group = (r.get("group") or "").strip()
+            if not slug or not group:
+                continue
+            try:
+                order = int((r.get("group_order") or "").strip() or 0)
+            except ValueError:
+                order = 0
+            rows.append((group, order, slug))
+    out = {}
+    for group, order, slug in sorted(rows, key=lambda x: (x[0], x[1])):
+        out.setdefault(group, []).append(slug)
+    # Keep the section order the site uses, not alphabetical.
+    return {g: out[g] for g in ("transcriptomics", "genomics", "epigenomics",
+                                "additional") if g in out}
+
+
+APPLICATIONS = _load_applications()
+APP_GROUPS = _load_groups()
+GROUP_OF = {slug: g for g, slugs in APP_GROUPS.items() for slug in slugs}
 
 
 def published():
