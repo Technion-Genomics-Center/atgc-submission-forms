@@ -1,0 +1,125 @@
+{
+  "name": "Submission forms",
+  "slug": "submissionform",
+  "order": 2,
+  "status": "live",
+  "icon": "submissionform.png",
+  "repo": "own",
+  "tagline": "One public web form per application. A researcher fills it in, downloads an .xlsx and emails it to the lab. Nothing is submitted to a server and no researcher data leaves the browser.",
+  "who": "Researchers fill them in. The lab receives the workbook and changes what the forms offer.",
+  "url": "https://technion-genomics-center.github.io/atgc-submission-forms/",
+  "launcher": [],
+  "readme": "README.md",
+  "reads": [
+    "data/reference/services.csv",
+    "SubmissionForm/data/routing.csv",
+    "SubmissionForm/data/form_kits.csv",
+    "SubmissionForm/data/prep_aliases.csv",
+    "SubmissionForm/data/applications.py",
+    "atgc/retired.py"
+  ],
+  "writes": [],
+  "owns": [
+    "SubmissionForm/data/routing.csv",
+    "SubmissionForm/data/form_kits.csv",
+    "SubmissionForm/data/prep_aliases.csv",
+    "SubmissionForm/data/applications.py"
+  ],
+  "docs": [
+    "docs/05_Analysis_Intake_Spec.md",
+    "docs/04_Decisions.md",
+    "docs/09_Reference_Data_Index.md"
+  ],
+  "notes": {
+    "use": "There is nothing to start. The forms are a website, and the lab's part is to send the researcher the link for their application and wait for the workbook to arrive by email.\n\nThe **quote number** on the form is the join key for everything downstream — quote, submission, project, run, report, invoice. A form that arrives without one is worth sending back.",
+    "built": "`dist/` is generated wholesale. Never hand-edit anything in it."
+  },
+  "sections": {
+    "use": [
+      "The one thing to know first",
+      "Who touches what"
+    ],
+    "change": [
+      {
+        "title": "Everyday changes",
+        "lede": true
+      },
+      "Change who receives a form",
+      "Add or change a library prep / kit",
+      "Add a new service to the catalog",
+      "Change the analysis questions"
+    ],
+    "built": [
+      {
+        "title": "Adding a whole new form",
+        "lede": true
+      },
+      "Slugs are permanent",
+      "Switching a form off",
+      "What the build checks, and why",
+      "Publishing — `main` is NOT the branch the site serves",
+      "Layout"
+    ]
+  },
+  "change": [
+    {
+      "what": "Add or drop a library prep on a form",
+      "tool": "CatalogAdmin",
+      "where": "Forms",
+      "url": "http://127.0.0.1:5004/forms",
+      "note": "It searches the real price list instead of letting you type a kit name, because a researcher reads their quote and looks for the same words on the form. A kit with no price can still be offered — it warns, and keeps warning, until the price exists."
+    },
+    {
+      "what": "Stop offering an application",
+      "tool": "CatalogAdmin",
+      "where": "Applications",
+      "url": "http://127.0.0.1:5004/applications",
+      "note": "The slug is a public contract. Retiring an application never frees its URL."
+    },
+    {
+      "what": "Change who receives a form",
+      "tool": null,
+      "manual": "No page covers this yet. Open `SubmissionForm/data/routing.csv` in Excel: one row per application per lab, addresses in `to` separated by `;`. **Leave `to` empty** if that lab does not offer the application — the lab then disappears from the researcher's dropdown. Save, then rebuild with `python build.py`."
+    },
+    {
+      "what": "Change the analysis questions a form asks",
+      "tool": null,
+      "manual": "No page covers this yet, and it is deliberately two edits kept together: `docs/05_Analysis_Intake_Spec.md` is the authority for what each application asks, and the sets live in `SETS` in `assets/form.js`. Change both.",
+      "docs": [
+        "docs/05_Analysis_Intake_Spec.md"
+      ]
+    },
+    {
+      "what": "Put a change live",
+      "tool": null,
+      "manual": "`python tools/publish.py \"Rebuild: what changed\"` from inside SubmissionForm. The live site is served from **gh-pages**, not `main` — a push to `main` succeeds and changes nothing a researcher can see, which is what makes that mistake so easy to announce."
+    }
+  ],
+  "quick": [
+    "The forms are a website — there is nothing to install and nothing to start.",
+    "Send the researcher the link for their application.",
+    "They fill it in, download the .xlsx and email it to the lab.",
+    "Check the form carries a quote number. It is the key to everything downstream.",
+    "To change what a form offers: CatalogAdmin, the Forms page.",
+    "A change is not live until someone runs tools/publish.py."
+  ],
+  "shots": [],
+  "keywords": [
+    "form",
+    "submission",
+    "intake",
+    "researcher",
+    "xlsx",
+    "workbook",
+    "recipients",
+    "routing",
+    "who receives",
+    "publish",
+    "gh-pages",
+    "website",
+    "link",
+    "slug",
+    "application",
+    "quote number"
+  ]
+}
