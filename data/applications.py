@@ -218,10 +218,18 @@ RULES = {
          ),
 
     "scrna-seq-10x": dict(analysis=SCRNA,
-         # Nitsan, 2026-08-12. The workbook predates it. Catalog carries five
-         # size variants (2/4/6/8 samples, and a T10 24-sample); the researcher
-         # picks the prep, staff pick the size when quoting.
-         extra_preps=["Illumina/Fluent scRNA-seq library prep"],
+         # Nitsan, 2026-08-17. "Illumina/Fluent scRNA-seq library prep" is GONE
+         # from this form. Fluent is the old name for Illumina scRNA-seq, which
+         # now has a form of its own listing the four real kits (§12.1), so
+         # keeping it here offered one service twice, under two names, on the
+         # wrong form. It was added on 2026-08-12, before that form existed.
+         #
+         # Deleting the `extra_preps` line is the whole fix: it was the only
+         # source of the term. The sc10X workbook never listed it.
+         # Nitsan, 2026-08-17. Cells or nuclei changes the handling, so it is
+         # asked once for the whole submission, immediately above the table it
+         # describes rather than among the sequencing choices.
+         sample_material=True,
          # Nitsan, 2026-08-16. 10X libraries are read at a fixed length on a
          # 100-cycle kit, and single/paired follows the chemistry. Both were
          # being asked as if the researcher chose them.
@@ -248,6 +256,12 @@ RULES = {
          # by the kit and set by the lab, so the researcher is not asked.
          flowcell_cycles=100,
          run_settings_from_kit=True,
+         # Nitsan, 2026-08-17. Borrowed from the 10X layout, whose header covers
+         # both cases: "Fresh: cells/ul ; Fixed: total #cells". This service
+         # takes fixed cells only, so half that header is a question the
+         # researcher cannot answer and the other half is the only one asked.
+         rename_columns={"Fresh: cells/ul ; Fixed: total #cells": "cells/ul"},
+         sample_material=True,
          # doc 05 §3.1 — the scRNA set, the same one 10X uses. CellRanger is
          # 10X's own software and is NOT offered here; Illumina libraries are
          # processed with Illumina's pipeline, so there is no primary_analysis

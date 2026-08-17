@@ -372,6 +372,21 @@ def build_spec(app, surveyed):
             columns.insert(pos, "Experimental group")
             report["added"].append("Experimental group (sample column)")
 
+    # A per-application header rename. CANONICAL_COLUMNS is platform-wide and
+    # cannot express "this form asks less than the form it borrowed from":
+    # Illumina scRNA-seq takes fixed cells only, so half of 10X's
+    # "Fresh: ... ; Fixed: ..." header is a question its researchers cannot
+    # answer.
+    for before, after in (app.get("rename_columns") or {}).items():
+        if before in columns:
+            columns[columns.index(before)] = after
+            report["renamed_columns"].append((before, after))
+        else:
+            raise SystemExit(
+                f"{app['slug']}: rename_columns expects a column {before!r} "
+                f"that is not in this table. The layout it borrows from has "
+                f"changed; fix the registry rather than leaving a dead rule.")
+
     for drop in app.get("drop_columns", []):
         if drop in columns:
             columns.remove(drop)
@@ -553,6 +568,11 @@ def build_spec(app, surveyed):
         "sequenced_kits": [k["label"] for k in (app.get("library_kits") or [])
                            if k.get("technology", "sequencing") == "sequencing"] or None,
         "sample_library_types": app.get("sample_library_types"),
+        # Cells or nuclei — one answer for the whole submission, asked directly
+        # above the table it describes (Nitsan, 2026-08-17).
+        "sample_material": (dict(label="Are you submitting cells or nuclei?",
+                                 options=["Cells", "Nuclei"])
+                            if app.get("sample_material") else None),
         "choices": choices,
         "vocabularies": vocab,
         "report": report,
