@@ -469,6 +469,82 @@ SLUG_ALIASES: dict[str, str] = {}
 APPLICATIONS_CSV = os.path.join(os.path.dirname(__file__), "applications.csv")
 
 
+# ── flat rule fields the CSV may also carry ─────────────────────────────────
+# `analysis`, `extraction` and the behaviour flags are selections from fixed
+# vocabularies, not conditional logic — so a new application can set them in the
+# CSV and needs NO Python edit to be built. That is the point of the split: a new
+# service should not end with a step only one person can do.
+#
+# **RULES still wins where it says anything.** The rule is: a fact goes in the
+# CSV when there is nothing to explain, and in RULES when there IS — and then the
+# comment beside it is the explanation. Every existing application keeps its
+# fields here, with the reasoning doc 05 recorded; their CSV cells are blank.
+FLAGS = {
+    "no_analysis_question", "no_sequencing", "no_experimental_group",
+    "no_library_prep", "no_flowcell", "no_qc", "extraction_always",
+    "keep_own_table", "export_catalog_name", "run_settings_from_kit",
+    "sample_material",
+}
+
+# Analysis-panel names, so a typo in the CSV is caught rather than silently
+# meaning "no panel".
+PANELS = {RNASEQ, SCRNA, SPATIAL, AMPLICON16S, SHOTGUN, AMPLICON, DNASEQ,
+          EXOME, CHIP, RRBS, OLINK, USER_PREPARED}
+
+EXTRACTION_KINDS = {"rna", "dna", "both"}
+
+
+class RegistryError(Exception):
+    """A row in applications.csv says something the registry cannot honour."""
+
+
+def _flat_rules_from_csv(r):
+    """The rule fields a CSV row is allowed to set, validated."""
+    out = {}
+    analysis = (r.get("analysis") or "").strip()
+    if analysis:
+        if analysis not in PANELS:
+            raise RegistryError(
+                "applications.csv: analysis=%r on %r is not a known panel. "
+                "One of: %s" % (analysis, r.get("key"),
+                                ", ".join(sorted(PANELS))))
+        out["analysis"] = analysis
+
+    extraction = (r.get("extraction") or "").strip().lower()
+    if extraction:
+        if extraction not in EXTRACTION_KINDS:
+            raise RegistryError(
+                "applications.csv: extraction=%r on %r must be one of %s"
+                % (extraction, r.get("key"), ", ".join(sorted(EXTRACTION_KINDS))))
+        out["extraction"] = extraction
+
+    prep = (r.get("catalog_prep") or "").strip()
+    if prep:
+        out["catalog_prep"] = prep
+
+    cycles = (r.get("flowcell_cycles") or "").strip()
+    if cycles:
+        try:
+            out["flowcell_cycles"] = int(cycles)
+        except ValueError:
+            raise RegistryError(
+                "applications.csv: flowcell_cycles=%r on %r is not a whole "
+                "number" % (cycles, r.get("key")))
+
+    # Semicolon-separated, and an unknown one is an ERROR rather than a no-op.
+    # A misspelled flag that quietly does nothing is the worst outcome here:
+    # the form builds, looks right, and asks a question it should not.
+    for flag in [f.strip() for f in (r.get("flags") or "").split(";")]:
+        if not flag:
+            continue
+        if flag not in FLAGS:
+            raise RegistryError(
+                "applications.csv: flag %r on %r is not a known flag. One of: "
+                "%s" % (flag, r.get("key"), ", ".join(sorted(FLAGS))))
+        out[flag] = True
+    return out
+
+
 def _load_applications():
     """Flat facts from the CSV, conditional rules from RULES above.
 
@@ -510,6 +586,9 @@ def _load_applications():
                 val = (r.get(field) or "").strip()
                 if val:
                     entry[field] = val
+            # CSV first, then RULES — so a documented decision always beats a
+            # bare cell, and the existing 18 applications are untouched.
+            entry.update(_flat_rules_from_csv(r))
             entry.update(RULES.get(key, {}))
             out.append(entry)
     return out
