@@ -322,6 +322,26 @@ function renderChoices() {
   }
 }
 
+/* ── cells or nuclei, doc 05 §16.4 ──────────────────────────────────────────
+ * One answer for the whole submission, sitting immediately above the table it
+ * describes. Radios, not a dropdown: two mutually exclusive options both
+ * visible is one glance rather than one click, and it cannot be left looking
+ * answered when it is not — the same reasoning as the protocol choice.
+ *
+ * It does NOT block export. doc 05 §18.1 lists the nine rules that do, and
+ * adding a tenth is Nitsan's call, not mine.
+ */
+function renderSampleMaterial() {
+  const box = $('#sample-material');
+  if (!box || !APP.sample_material) return;
+  const cfg = APP.sample_material;
+  box.innerHTML = `<div class="field" data-field="material">` +
+    `<span class="grouplabel">${cfg.label}</span><div class="radios">` +
+    cfg.options.map(o =>
+      `<label class="radio"><input type="radio" name="material" value="${o}">${o}</label>`
+    ).join('') + '</div></div>';
+}
+
 /* An empty section is worse than no section — a heading with nothing under it
  * reads as something that failed to load. */
 function dropEmptySections() {
@@ -989,6 +1009,13 @@ function collect() {
     submission.push([L(labelText(w.querySelector('label'))), sel.value]);
   });
 
+  /* Cells or nuclei belongs with the samples, not the sequencing choices, so it
+   * is collected here rather than by the loop above — that loop walks
+   * #choice-fields and this control deliberately lives above the table. */
+  const material = document.querySelector('input[name="material"]:checked');
+  if (material)
+    submission.push([L(APP.sample_material.label), material.value]);
+
   /* The flow cell also goes out under its CATALOG name, so the submission, the
    * quote and the lab report all name one service (D6). */
   const fc = document.getElementById('c-flowcell');
@@ -1446,5 +1473,6 @@ document.addEventListener('change', () => {
 });
 state.id = submissionId();
 validate();
+renderSampleMaterial();
 renderSendTo();
 renderShipping();
