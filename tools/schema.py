@@ -56,6 +56,10 @@ TYPOS = {
     "samle": "sample",
     "SpcaeRanger": "SpaceRanger",
     "coloumn": "column",
+    # Nitsan, 2026-08-17. In the sc10X workbook, so it reached both the 10X form
+    # and Illumina scRNA-seq, which borrows that layout.
+    "caputred": "captured",
+    "Caputred": "Captured",
 }
 
 # NOT fixed here: "RNA extraction [fibrouse tissue]" is a CATALOG SERVICE NAME,

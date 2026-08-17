@@ -1103,6 +1103,10 @@ const COLUMN_ALIASES = {
   'sample id': null,          // dropped — the row number is the sample number
   '#': null,
   'species': 'Organism',      // renamed 2026-08-13; old tables still import
+  // Spelling corrected 2026-08-17. A blank table downloaded before that
+  // still carries the old header, so it has to keep importing.
+  '#caputred cells*': '#captured cells*',
+  '#caputred cells': '#captured cells*',
 };
 
 const norm = s => String(s == null ? '' : s).trim().replace(/\s+/g, ' ');
