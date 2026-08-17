@@ -783,6 +783,21 @@ function validate() {
   $('[data-field="lab"]').classList.toggle('is-error', labBad);
   if (labBad) problems.push('Which ATGC lab you are submitting to');
 
+  /* doc 05 §18.1 rule 10 — cells or nuclei. Made blocking on Nitsan's
+   * instruction, 2026-08-17. Cells and nuclei are handled differently and the
+   * form cannot guess, so an unanswered submission is one the lab has to chase.
+   *
+   * The wrapper lives above the sample table, not in #choice-fields, so it is
+   * checked here by name rather than by the loop that walks the choices. */
+  if (APP.sample_material) {
+    const wrap = document.querySelector('[data-field="material"]');
+    const picked = document.querySelector('input[name="material"]:checked');
+    if (wrap && !hiddenField(wrap)) {
+      wrap.classList.toggle('is-error', !picked);
+      if (!picked) problems.push(APP.sample_material.label);
+    }
+  }
+
   if (APP.protocol_choice) {
     const wrap = document.querySelector('[data-field="protocol"]');
     const picked = document.querySelector('input[name="protocol"]:checked');
@@ -843,9 +858,17 @@ function validate() {
 const KEY = 'atgc-submission-' + APP.slug;
 
 function snapshot() {
-  const d = { at: Date.now(), fields: {}, rows: [] };
+  const d = { at: Date.now(), fields: {}, rows: [], groups: {} };
   document.querySelectorAll('input[id], select[id], textarea[id]').forEach(el => {
     if (el.type !== 'file') d.fields[el.id] = el.value;
+  });
+  /* Radios and checkboxes are keyed by NAME, not id, so the loop above never
+   * saw them. Harmless while nothing depended on them; not harmless now that
+   * cells/nuclei blocks export, because resuming a draft would block on a
+   * question the researcher had already answered. */
+  document.querySelectorAll('input[type="radio"]:checked, ' +
+                            'input[type="checkbox"][name]:checked').forEach(el => {
+    (d.groups[el.name] = d.groups[el.name] || []).push(el.value);
   });
   [...$('#samples tbody').rows].forEach(tr =>
     d.rows.push([...tr.querySelectorAll('input,select')].map(i => i.value)));
@@ -870,6 +893,11 @@ function offerRestore() {
 function applyDraft(d) {
   setRows(d.rows.length || 1);
   Object.entries(d.fields).forEach(([id, v]) => { const el = document.getElementById(id); if (el) el.value = v; });
+  Object.entries(d.groups || {}).forEach(([name, vals]) => {
+    document.querySelectorAll(`input[name="${name}"]`).forEach(el => {
+      if (vals.includes(el.value)) el.checked = true;
+    });
+  });
   if ($('#c-analysis') && $('#c-analysis').value === 'Yes')
     $('#c-analysis').dispatchEvent(new Event('change'));
   [...$('#samples tbody').rows].forEach((tr, r) =>
@@ -1472,7 +1500,10 @@ document.addEventListener('change', () => {
   validate(); renderSendTo(); renderShipping(); saveDraft();
 });
 state.id = submissionId();
-validate();
+/* renderSampleMaterial BEFORE validate: it is a blocking question now
+ * (doc 05 §18.1 rule 10), and validate cannot see a control that does not
+ * exist yet. Called after, the first paint reported no problem. */
 renderSampleMaterial();
+validate();
 renderSendTo();
 renderShipping();
