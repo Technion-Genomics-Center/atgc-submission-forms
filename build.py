@@ -215,7 +215,17 @@ def check_unpriced_kits(specs):
             continue
         for kit in app.get("library_kits") or []:
             cat = kit.get("catalog")
-            if cat and cat in known and cat not in priced:
+            if not cat:
+                continue
+            if cat not in known:
+                # Worse than unpriced: the entry is not in the catalog at all.
+                # "10X Visium HD 3' [2 slides]" was added by hand and then lost
+                # when services.csv was regenerated from price_list.csv, and
+                # nothing said so, because this check only looked at entries it
+                # could find.
+                out.setdefault(cat + "  [MISSING from services.csv]",
+                               []).append(app["slug"])
+            elif cat not in priced:
                 out.setdefault(cat, []).append(app["slug"])
     return out
 
@@ -436,6 +446,41 @@ def main():
     print(f"unpriced kits : {len(unpriced)} offered kit(s) the catalog cannot quote")
     for cat, slugs in unpriced.items():
         print(f"  WARN {cat} - on {', '.join(slugs)}; submits fine, cannot be quoted")
+
+    # An offered prep that resolves to NEITHER the catalog nor a known-gap entry.
+    #
+    # This hole cost a real regression. services.csv is REGENERATED from
+    # price_list.csv and is not in git, so two entries added by hand on Nitsan's
+    # instruction - "18S library prep" and "10X Visium HD 3' [2 slides]" - were
+    # wiped the next time it was rebuilt, because price_list.csv never got the
+    # rows. The forms went on offering both, and the build said nothing: the
+    # catalog-gap check only reports terms listed in NEEDS_CATALOG_ENTRY by
+    # hand, and these had been resolvable when that list was written.
+    #
+    # So report the unresolved ones too. A service the researcher can pick and
+    # nobody can quote is worth a line on every build, whether or not someone
+    # remembered to predict it.
+    # Two legitimate reasons a prep is not a catalog service, neither a problem:
+    #   "Other"  - the researcher writing in something we then discuss
+    #   a BENCH KIT - labprep.csv is the authority for those (docs/09 1), and
+    #                 the Illumina scRNA-seq kits are named from it on purpose
+    import csv as _csv
+    bench = set()
+    lp = ROOT.parent / "LabReport_generator" / "data" / "labprep.csv"
+    if lp.exists():
+        with open(lp, encoding="utf-8-sig") as fh:
+            bench = {r["Kit_Name"].strip() for r in _csv.DictReader(fh)}
+
+    stray = {}
+    for spec in specs:
+        for term in spec["report"].get("unresolved_preps", []):
+            if term == "Other" or term in bench:
+                continue
+            stray.setdefault(term, []).append(spec["slug"])
+    print(f"unknown preps : {len(stray)} offered prep(s) in neither the catalog "
+          f"nor NEEDS_CATALOG_ENTRY")
+    for term, slugs in stray.items():
+        print(f"  WARN {term} - on {', '.join(slugs)}; was it dropped from the catalog?")
 
     if pending:
         print(f"catalog gaps  : {len(pending)} offered service(s) with no catalog entry")
