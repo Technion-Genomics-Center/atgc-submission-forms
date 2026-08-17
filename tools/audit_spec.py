@@ -107,8 +107,11 @@ CHECKS = [
              "catalog" in json.dumps((spec_of("spatial-transcriptomics") or {})
                                      .get("vocabularies", {}))),
 
-    ("§18.1", "nine blocking rules enforced",
-     lambda: JS.count("problems.push") >= 9),
+    ("§18.1", "ten blocking rules enforced",
+     lambda: JS.count("problems.push") >= 10),
+    ("§18.1", "rule 10 — cells or nuclei blocks export",
+     lambda: 'name="material"]:checked' in JS and
+             "problems.push(APP.sample_material.label)" in JS),
     ("§18.1", "quote never blocks (D8)",
      lambda: "A quote is not required" in JS),
 

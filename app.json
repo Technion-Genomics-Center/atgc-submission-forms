@@ -16,14 +16,16 @@
     "SubmissionForm/data/form_kits.csv",
     "SubmissionForm/data/prep_aliases.csv",
     "SubmissionForm/data/applications.py",
-    "atgc/retired.py"
+    "atgc/retired.py",
+    "SubmissionForm/data/applications.csv"
   ],
   "writes": [],
   "owns": [
     "SubmissionForm/data/routing.csv",
     "SubmissionForm/data/form_kits.csv",
     "SubmissionForm/data/prep_aliases.csv",
-    "SubmissionForm/data/applications.py"
+    "SubmissionForm/data/applications.py",
+    "SubmissionForm/data/applications.csv"
   ],
   "docs": [
     "docs/05_Analysis_Intake_Spec.md",
