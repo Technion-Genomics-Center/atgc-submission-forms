@@ -120,7 +120,7 @@ LABS = [
         "to": ["fdoron@technion.ac.il", "gliza@technion.ac.il",
                "nitsanf@technion.ac.il"],
         "address": ["Technion Genomics Center",
-                    "M1 floor, Medicine Faculty",
+                    "M1 floor, Faculty of Medicine",
                     "Efron Street, Haifa (near Rambam hospital)"],
         "phone": "073-3785221",
     },
