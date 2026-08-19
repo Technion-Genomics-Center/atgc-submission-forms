@@ -157,14 +157,6 @@ td.rownum { padding: 0 .5rem; color: var(--ink-soft); text-align: right; }
 .consult p:last-child { margin: 0; font-size: var(--fs-small); color: var(--ink-soft); }
 
 #analysis-panel { margin-top: 1rem; }
-/* The standing-service statement above the question: what the order already
- * includes, so "No" is understood as declining the extra work rather than all
- * of it. Quieter than the consultation warning, louder than a hint. */
-.analysis-intro {
-  margin: 0 0 .8rem; padding: .55rem .8rem;
-  background: var(--surface-alt); border-left: 3px solid var(--accent);
-  border-radius: 0 var(--radius) var(--radius) 0;
-}
 
 /* ── messages ─────────────────────────────────────────────────────────── */
 .msg { margin: .6rem 0; padding: .55rem .8rem; border-radius: var(--radius); font-size: var(--fs-small); }
@@ -295,11 +287,6 @@ th         { background: var(--navy); }
 
 /* The optional request reads as an offer, not another hurdle: no accent bar,
  * lighter weight, and it never turns red because it never blocks. */
-.confirm.optional {
-  border-left-color: var(--line);
-  background: var(--surface);
-}
-.confirm.optional label { font-weight: 400; }
 .confirm .note {
   display: block; margin-top: .2rem;
   font-size: var(--fs-small); color: var(--muted);

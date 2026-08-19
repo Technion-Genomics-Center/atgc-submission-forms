@@ -542,8 +542,6 @@ function renderBioinformatics() {
         <select id="c-primary"><option value=""></option><option>Yes</option><option>No</option></select>
       </label>
     </div>` : ''}
-    ${APP.analysis_intro
-      ? `<p class="analysis-intro">${APP.analysis_intro}</p>` : ''}
     <div class="field" data-field="analysis">
       <label>${APP.analysis_label || 'Do you require bioinformatic analysis?'}
         <select id="c-analysis"><option value=""></option><option>Yes</option><option selected>No</option></select>
@@ -1085,8 +1083,6 @@ function collect() {
   submission.push([], [H('Confirmation'), H('')]);
   submission.push([L('Information confirmed correct'),
                    document.getElementById('confirm').checked ? 'YES' : 'no']);
-  submission.push([L('Keep excess samples for collection'),
-                   document.getElementById('keep-samples').checked ? 'YES' : 'no']);
 
   const lab = $('#f-lab').value;
   const addr = (APP.addresses || {})[lab];
@@ -1117,9 +1113,6 @@ function collect() {
       ['', N('A consultation meeting with Liat Linde or Nitsan Fourier is ' +
              'required before analysis begins.')],
     ];
-    /* What the order already includes, where that is not all-or-nothing.
-     * Without it an Olink record reads as if nothing was analysed. */
-    if (APP.analysis_intro) analysis.push(['', N(APP.analysis_intro)]);
     analysis.push([], [H('Requested'), H('')]);
 
     /* The ANSWER itself, which nothing used to record.
