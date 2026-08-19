@@ -385,11 +385,11 @@ RULES = {
          # researcher also wants the differential work on top.
          #
          # Saying "Do you require bioinformatic analysis?" here was actively
-         # misleading - answering No reads as "no analysis", when initial
-         # analysis is part of the service and cannot be declined.
-         analysis_intro=("Every Olink Reveal order includes initial data "
-                         "analysis, which delivers the NPX count matrix."),
-         analysis_label="Do you require full differential analysis?",
+         # misleading - answering No reads as "no analysis", when the initial
+         # analysis is part of the service and cannot be declined. "Advanced"
+         # carries that on its own, so Nitsan dropped the standing statement
+         # that used to sit above the question (2026-08-17).
+         analysis_label="Do you require advanced bioinformatic analysis?",
          # The comparisons are needed either way: they describe the experiment,
          # not the extra service. So this field sits OUTSIDE the Yes/No gate and
          # is asked of every Olink submission - see ALWAYS in assets/form.js.
