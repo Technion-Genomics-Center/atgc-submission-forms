@@ -542,8 +542,10 @@ function renderBioinformatics() {
         <select id="c-primary"><option value=""></option><option>Yes</option><option>No</option></select>
       </label>
     </div>` : ''}
+    ${APP.analysis_intro
+      ? `<p class="analysis-intro">${APP.analysis_intro}</p>` : ''}
     <div class="field" data-field="analysis">
-      <label>Do you require bioinformatic analysis?
+      <label>${APP.analysis_label || 'Do you require bioinformatic analysis?'}
         <select id="c-analysis"><option value=""></option><option>Yes</option><option selected>No</option></select>
       </label>
     </div>
@@ -552,7 +554,14 @@ function renderBioinformatics() {
   const openPanel = () => {
     const yes = $('#c-analysis').value === 'Yes';
     $('#consult').classList.toggle('quiet', !yes);
-    $('#analysis-panel').innerHTML = yes ? panelFor(APP.analysis) : '';
+    /* The always-fields stay whichever way the question is answered; the gated
+     * panel appends below them. Both live inside #analysis-panel so the one
+     * mandatory-field selector in validate() covers them without knowing the
+     * difference. */
+    const body = alwaysFor(APP.analysis) + (yes ? panelFor(APP.analysis) : '');
+    $('#analysis-panel').innerHTML = body +
+      (body ? '<p class="hint">Fields marked * must be filled in before you '
+            + 'can export. Hebrew is accepted in this section.</p>' : '');
     if (yes) {
       const rule = BRANCHES[APP.analysis];
       if (rule && $('#a-' + rule.on)) {
@@ -563,6 +572,10 @@ function renderBioinformatics() {
     validate();
   };
   $('#c-analysis').addEventListener('change', openPanel);
+  /* Run it once at load. The question defaults to No, so nothing used to
+   * render until the researcher touched it - fine when the panel was
+   * entirely gated, wrong now that some fields are asked either way. */
+  openPanel();
 
   /* doc 05 §3.2 — SpaceRanger is 10X Visium software, so it is only asked for a
    * Visium kit. Switching to CosMx must clear the answer rather than exporting
@@ -637,7 +650,7 @@ const SETS = {
   amplicon: [['aim', 'Biological question and analysis aim', 1],
              ['describe', 'Describe the requested analysis', 1]],
   rrbs: [['describe', 'Analysis requirements — describe what you need', 1]],
-  olink: [['comparisons', 'Comparisons required — detail each one', 1]],
+  olink: [],
   chip: [['aim', 'Biological question and analysis aim', 1],
          ['ref', 'Genome reference (URL)', 0],
          ['gtf', 'Annotation (GTF) file (URL)', 0],
@@ -668,6 +681,16 @@ SETS.shotgun = SETS.amplicon_16s.concat([
 /* doc 05 §2.1 — bacterial rRNA-removal work may be metatranscriptomics, which
  * is a metagenomics question rather than a differential-expression one. */
 const RNASEQ_BRANCH_PREP = 'NEBNext Directional RNA Library Prep [rRNA removal bacteria]';
+
+/* doc 05 §9 — fields asked whether or not the extra analysis is wanted.
+ *
+ * Olink is the only application where the analysis question is "do you want
+ * MORE?" rather than "do you want ANY?": the initial pass is part of every
+ * Reveal order. The comparisons describe the experiment, not the extra
+ * service, so the lab needs them either way and they sit outside the gate. */
+const ALWAYS = {
+  olink: [['comparisons', 'Comparisons required — detail each one', 1]],
+};
 
 const BRANCHES = {
   dnaseq: {
@@ -710,6 +733,13 @@ function fieldRow(spec) {
          (req ? '<span class="req">*</span>' : '') + control + '</label>' + note + '</div>';
 }
 
+function alwaysFor(kind) {
+  const set = ALWAYS[kind];
+  if (!set || !set.length) return '';
+  return '<div class="stack" id="analysis-always">' +
+    set.map(fieldRow).join('') + '</div>';
+}
+
 function panelFor(kind) {
   let set = SETS[kind] || SETS.rnaseq;
 
@@ -722,11 +752,11 @@ function panelFor(kind) {
             ['Differential expression', 'Metatranscriptomics']]].concat(set);
   }
 
-  return '<div class="stack" id="analysis-fields">' +
-    set.map(fieldRow).join('') + '</div>' +
-    '<div class="stack" id="analysis-branch"></div>' +
-    '<p class="hint">Fields marked * must be filled in before you can export. ' +
-    'Hebrew is accepted in this section.</p>';
+  return (set.length
+            ? '<div class="stack" id="analysis-fields">' +
+              set.map(fieldRow).join('') + '</div>'
+            : '') +
+    '<div class="stack" id="analysis-branch"></div>';
 }
 
 /* Show the fields that only apply to the answer just given. */
@@ -1086,9 +1116,24 @@ function collect() {
       ['', T('Bioinformatics analysis')],
       ['', N('A consultation meeting with Liat Linde or Nitsan Fourier is ' +
              'required before analysis begins.')],
-      [],
-      [H('Requested'), H('')],
     ];
+    /* What the order already includes, where that is not all-or-nothing.
+     * Without it an Olink record reads as if nothing was analysed. */
+    if (APP.analysis_intro) analysis.push(['', N(APP.analysis_intro)]);
+    analysis.push([], [H('Requested'), H('')]);
+
+    /* The ANSWER itself, which nothing used to record.
+     *
+     * It did not show while the sheet only existed when the answer was Yes -
+     * the sheet's presence was the answer. Olink breaks that: its comparisons
+     * are asked either way, so the sheet is there whatever was chosen, and
+     * "no full analysis" and "full analysis" produced identical files. */
+    const askedEl = document.getElementById('c-analysis');
+    if (askedEl) {
+      analysis.push([L(APP.analysis_label ||
+                       'Do you require bioinformatic analysis?'),
+                     askedEl.value || '(not answered)']);
+    }
     panel.forEach(t => analysis.push(
       [L(labelText(t.closest('label')).replace('*', '').trim()), t.value.trim()]));
     sheets.push({ name: 'Analysis', rows: analysis, cols: [40, 76] });
