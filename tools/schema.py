@@ -570,6 +570,12 @@ def build_spec(app, surveyed):
         "sample_library_types": app.get("sample_library_types"),
         # Cells or nuclei — one answer for the whole submission, asked directly
         # above the table it describes (Nitsan, 2026-08-17).
+        # doc 05 §9 — Olink's analysis question is not "any analysis?" but
+        # "the extra analysis?", because the initial pass is part of the
+        # service. Wording lives in the registry; the default is unchanged.
+        "analysis_intro": app.get("analysis_intro"),
+        "analysis_label": app.get("analysis_label"),
+        "analysis_always_fields": app.get("analysis_always_fields", False),
         "sample_material": (dict(label="Are you submitting cells or nuclei?",
                                  options=["Cells", "Nuclei"])
                             if app.get("sample_material") else None),

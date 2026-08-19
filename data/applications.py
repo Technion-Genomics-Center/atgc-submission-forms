@@ -379,6 +379,21 @@ RULES = {
     "rrbs": dict(analysis=RRBS, extraction="dna"),
 
     "olink-reveal": dict(analysis=OLINK,
+         # Nitsan, 2026-08-17 (doc 05 §9). Olink is the one application where
+         # analysis is not all-or-nothing: every Reveal order already includes
+         # the initial analysis, so the only open question is whether the
+         # researcher also wants the differential work on top.
+         #
+         # Saying "Do you require bioinformatic analysis?" here was actively
+         # misleading - answering No reads as "no analysis", when initial
+         # analysis is part of the service and cannot be declined.
+         analysis_intro=("Every Olink Reveal order includes initial data "
+                         "analysis, which delivers the NPX count matrix."),
+         analysis_label="Do you require full differential analysis?",
+         # The comparisons are needed either way: they describe the experiment,
+         # not the extra service. So this field sits OUTSIDE the Yes/No gate and
+         # is asked of every Olink submission - see ALWAYS in assets/form.js.
+         analysis_always_fields=True,
          # doc 05 §16.2 — keeps its own plate-based table, no concentration.
          keep_own_table=True,
          # Nitsan, 2026-08-13: the free-text "other" column is not used, and
