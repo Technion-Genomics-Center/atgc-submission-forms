@@ -13,3 +13,4 @@ NEBNext directional RNA library prep [rRNA removal],NEBNext Directional RNA Libr
 10X fixed scRNA-seq lib prep [1BC],,CHECK,"catalog splits by sample count: [1BC, 2/3/4/6 samples]",scrna-seq-10x
 10X fixed scRNA-seq lib prep [4BC],,CHECK,"catalog splits by sample count: [4BC, 4/8 samples]",scrna-seq-10x
 Other,,keep,"genuinely 'Other' — no catalog entry, leave as is",rnaseq; metagenomics-16s-18s; shotgun-metagenomics; amplicon-seq; dna-seq; exome-seq; chip-seq-cut-and-run; rrbs; user-prepared; nanopore; mirna-seq; cell-line-authentication; extraction
+Illumina Single Cell 3' RNA Prep T10,Illumina scRNA-seq T10 library prep,ok,"priced by project size, like 10X - the form asks which kit, the quote picks the bracket. Only T10 is priced; Nitsan 2026-08-20 will add T2/T20/T100 entries when relevant.",illumina-scrna-seq
