@@ -17,8 +17,8 @@ chip-seq-cut-and-run,Cut&run library prep,
 chip-seq-cut-and-run,Other,
 rrbs,RRBS library prep,
 rrbs,Other,
-nanopore,Nanopore DNA ligation library prep,"Nanopore kit, no service in the price list"
-nanopore,Nanopore DNA rapid library prep,"Nanopore kit, no service in the price list"
+nanopore,Nanopore DNA ligation library prep,price coming (Nitsan 2026-08-19); recipe is Native Barcoding V14
+nanopore,Nanopore DNA rapid library prep,rapid prep is a different kit from Native Barcoding V14 - no recipe yet (Nitsan 2026-08-19); price coming
 nanopore,Other,
 exome-seq,Twist Exome library prep,
 exome-seq,Other,
