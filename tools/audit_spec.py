@@ -107,8 +107,12 @@ CHECKS = [
              "catalog" in json.dumps((spec_of("spatial-transcriptomics") or {})
                                      .get("vocabularies", {}))),
 
-    ("§18.1", "ten blocking rules enforced",
-     lambda: JS.count("problems.push") >= 10),
+    ("§18.1", "eleven blocking rules enforced",
+     lambda: JS.count("problems.push") >= 11),
+    ("§16.6", "rule 11 — Q/Q measurement choice blocks export",
+     lambda: "Choose at least one measurement" in JS),
+    ("§16.6", "the QC panel is exported",
+     lambda: ".qc-panel .field" in JS),
     ("§18.1", "rule 10 — cells or nuclei blocks export",
      lambda: 'name="material"]:checked' in JS and
              "problems.push(APP.sample_material.label)" in JS),

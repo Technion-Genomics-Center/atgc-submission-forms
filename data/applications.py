@@ -418,6 +418,15 @@ RULES = {
 
     # ── no bioinformatics question at all, doc 05 §12.5 ─────────────────────
     "cell-line-authentication": dict(analysis=None, no_analysis_question=True,
+         # Nitsan, 2026-08-19. CLA extracts from cell lines and nothing else,
+         # so: no "tissue weight" (there is no tissue), no organism (the cell
+         # line names it), and no experimental group - CLA is per-line
+         # identification, not a comparison, which is why §16.3 already exempts
+         # its own table from that column.
+         extraction_columns=["Sample name", "# cells", "Remarks"],
+         # One extraction service exists for cell lines, so the kit dropdown
+         # would have a single answer. Ask Yes/No and stop.
+         extraction_no_kit=True,
          # doc 05 §16.3 — normalised naming, but still no experimental group.
          no_experimental_group=True,
          # A lab service, not a sequencing run: the workbook asks only about DNA
@@ -432,6 +441,14 @@ RULES = {
          # separately and takes a different kit, so each is its own question.
          # Kits are the workbook's own lists (Setting!Qubit, Setting!Tapestation).
          no_sequencing=True,
+         # Nitsan, 2026-08-19. The workbook asked only for a name and remarks,
+         # but measuring IS the service: the researcher has usually measured
+         # something already, and the lab needs to know what they got and on
+         # what instrument before deciding which kit to run.
+         # Literal, not schema.QUANT_COLUMN: schema imports this file, so
+         # importing it back would be circular. canonical_column() maps
+         # every spelling of this header to exactly this string.
+         add_columns=["ng/ul", "Quantified by"],
          qc_panel=dict(
              guide_url=SITE + "dna-rna-quality-and-quantity/",
              note=("Please supply samples at the concentration the kit requires "
@@ -446,13 +463,19 @@ RULES = {
                  label="Do you require TapeStation?",
                  type_label="DNA or RNA?",
                  kit_label="TapeStation kit",
+                 # Nitsan, 2026-08-19. "Other" plus a free-text box, because
+                 # when Qubit and TapeStation are both ordered the Qubit result
+                 # decides which TapeStation kit is right - so the researcher
+                 # genuinely cannot know it yet. Forcing a pick would get a
+                 # guess; this gets the truth.
+                 other_label="Other — describe",
                  kits={
                      "DNA": ["D1000 DNA", "High Sensitivity D1000 DNA",
-                             "Genomic DNA", "HS Genomic DNA"],
+                             "Genomic DNA", "HS Genomic DNA", "Other"],
                      "RNA": ["RNA [Eukaryotes]",
                              "High Sensitivity RNA [Eukaryotes]",
                              "RNA [Prokaryotes]",
-                             "High Sensitivity RNA [Prokaryotes]"],
+                             "High Sensitivity RNA [Prokaryotes]", "Other"],
                  }),
          )),
 

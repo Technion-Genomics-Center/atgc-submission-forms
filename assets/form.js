@@ -14,6 +14,26 @@
 const APP = window.APP;
 const $ = (s, r = document) => r.querySelector(s);
 
+/* Bind a listener only if the control exists.
+ *
+ * Every form is built from the same code with different questions, so a
+ * control that is present on seventeen forms is absent on the eighteenth. A
+ * bare addEventListener on the missing one throws DURING STARTUP, which aborts
+ * the rest of the wiring: the extraction form lost its sample table, its QC
+ * panel and its whole bioinformatics section that way, and looked half-built
+ * rather than broken. Two separate controls caused it. Use this instead. */
+/* Is this field currently taken away from the researcher? Used by BOTH the
+ * validator (a hidden question cannot block export) and the exporter (an
+ * unasked question has no answer), so it lives at module scope - it was a
+ * local inside validate() and the exporter could not see it. */
+const hiddenField = wrap => !wrap || !!wrap.closest('[hidden]');
+
+const on = (sel, ev, fn) => {
+  const el = typeof sel === 'string' ? $(sel) : sel;
+  if (el) el.addEventListener(ev, fn);
+  return el;
+};
+
 /* ── header fields, doc 05 §15 ─────────────────────────────────────────── */
 const HEADER_FIELDS = [
   { id: 'date',      label: 'Date',              type: 'date' },
@@ -229,8 +249,11 @@ function renderChoices() {
     const byType = v.ExtractionByType;
     const typeWrap = byType
       ? add('exttype', 'DNA or RNA?', Object.keys(byType)) : null;
-    const kit = add('extraction', 'Extraction service',
-                    byType ? [] : v.ExtractionService);
+    /* Where a form has exactly one extraction service, the dropdown would hold
+     * one answer. CLA is that case: cell lines, one service. Ask Yes/No only. */
+    const kit = APP.extraction_no_kit
+      ? null
+      : add('extraction', 'Extraction service', byType ? [] : v.ExtractionService);
     if (byType) {
       $('#c-exttype').addEventListener('change', () => {
         const list = byType[$('#c-exttype').value] || [];
@@ -239,11 +262,14 @@ function renderChoices() {
       });
     }
     const sync = () => {
-      const on = APP.extraction_always || $('#c-needext').value === 'Yes';
+      const needEl = $('#c-needext');
+      const on = APP.extraction_always || (needEl && needEl.value === 'Yes');
       if (typeWrap) typeWrap.hidden = !on;
-      kit.hidden = !on || (!!byType && !$('#c-exttype').value);
-      if (!on) { $('#c-extraction').value = ''; if (typeWrap) $('#c-exttype').value = ''; }
-      if (APP.extraction_always) { /* nothing to hide */ }
+      if (kit) kit.hidden = !on || (!!byType && !$('#c-exttype').value);
+      if (!on) {
+        if (kit) $('#c-extraction').value = '';
+        if (typeWrap) $('#c-exttype').value = '';
+      }
 
       /* doc 05 §11.2 — the note the RNAseq-extraction workbook carried. */
       let note = $('#extraction-note');
@@ -261,7 +287,8 @@ function renderChoices() {
       reshapeSamples();
     };
     if (byType) $('#c-exttype').addEventListener('change', sync);
-    $('#c-needext').addEventListener('change', sync);
+    /* Not asked on the extraction form itself — extraction is the service. */
+    on('#c-needext', 'change', sync);
     sync();
   }
 
@@ -284,10 +311,13 @@ function renderChoices() {
       ).join('') + '</div>';
     box.appendChild(wrap);
     const syncQc = () => {
-      wrap.hidden = $('#c-qc').value !== 'Yes';
+      const q = $('#c-qc');
+      wrap.hidden = !!q && q.value !== 'Yes';
       if (wrap.hidden) wrap.querySelectorAll('input').forEach(i => { i.checked = false; });
     };
-    $('#c-qc').addEventListener('change', syncQc);
+    /* The extraction form lists QC services but asks no QC Yes/No, so this
+     * control is absent there. */
+    on('#c-qc', 'change', syncQc);
     syncQc();
   }
 
@@ -404,14 +434,24 @@ function renderQcPanel() {
       <label>${cfg.tapestation.kit_label}
         <select id="c-tskit"><option value=""></option></select>
       </label>
+    </div>
+    <div class="field wide" data-field="tskitother" hidden>
+      <label>${cfg.tapestation.other_label || 'Other — describe'}
+        <input id="c-tskitother" type="text">
+      </label>
     </div>`;
   box.parentElement.insertBefore(block, box.nextSibling);
 
   const show = (sel, on) => { $(`[data-field="${sel}"]`).hidden = !on;
                               if (!on) $('#c-' + sel).value = ''; };
 
-  $('#c-qubit').addEventListener('change', e =>
-    show('qubitkit', e.target.value === 'Yes'));
+  /* "Other" is the honest answer when both instruments are ordered: the Qubit
+   * result decides which TapeStation kit is right, so the researcher cannot
+   * know it yet. Ask them to say what they need instead of guessing. */
+  const syncOther = () => show('tskitother', $('#c-tskit').value === 'Other');
+  on('#c-tskit', 'change', syncOther);
+
+  on('#c-qubit', 'change', e => show('qubitkit', e.target.value === 'Yes'));
 
   const syncTs = () => {
     const on = $('#c-tapestation').value === 'Yes';
@@ -423,9 +463,12 @@ function renderQcPanel() {
       $('#c-tskit').innerHTML = '<option value=""></option>' +
         kits.map(k => `<option>${k}</option>`).join('');
     }
+    /* Rebuilding the list clears the selection, and hiding the kit must hide
+     * the box that belongs to it. */
+    syncOther();
   };
-  $('#c-tapestation').addEventListener('change', syncTs);
-  $('#c-tstype').addEventListener('change', syncTs);
+  on('#c-tapestation', 'change', syncTs);
+  on('#c-tstype', 'change', syncTs);
   syncTs();
 }
 
@@ -792,8 +835,6 @@ function validate() {
    * hides for any reason stops being required at the same moment. The analysis
    * panel already worked this way; `need` did not. Anything that hides a field
    * from now on inherits the correct behaviour for free. */
-  const hiddenField = wrap => !wrap || !!wrap.closest('[hidden]');
-
   const need = (id, label) => {
     const el = $('#c-' + id);
     if (!el) return;
@@ -836,6 +877,35 @@ function validate() {
       if (!picked) problems.push(APP.protocol_choice.label);
     }
   }
+  /* doc 05 §18.1 rule 11 — the Q/Q form's whole content is which measurement
+   * is wanted and on which kit. Left blank it orders nothing, so it blocks.
+   * Nitsan, 2026-08-19. */
+  if (APP.qc_panel) {
+    const val = id => { const e = $('#c-' + id); return e ? e.value : ''; };
+    const mark2 = (id, bad) => { const w = $(`[data-field="${id}"]`);
+      if (w && !hiddenField(w)) w.classList.toggle('is-error', bad); };
+
+    const qubit = val('qubit') === 'Yes', ts = val('tapestation') === 'Yes';
+    if (!qubit && !ts) {
+      problems.push('Choose at least one measurement — Qubit or TapeStation');
+      mark2('qubit', true); mark2('tapestation', true);
+    } else { mark2('qubit', false); mark2('tapestation', false); }
+
+    if (qubit && !val('qubitkit')) {
+      problems.push('Qubit kit'); mark2('qubitkit', true);
+    } else { mark2('qubitkit', false); }
+
+    if (ts && !val('tstype')) { problems.push('DNA or RNA?'); mark2('tstype', true); }
+    else { mark2('tstype', false); }
+    if (ts && val('tstype') && !val('tskit')) {
+      problems.push('TapeStation kit'); mark2('tskit', true);
+    } else { mark2('tskit', false); }
+    if (val('tskit') === 'Other' && !val('tskitother').trim()) {
+      problems.push('Describe the TapeStation kit you need');
+      mark2('tskitother', true);
+    } else { mark2('tskitother', false); }
+  }
+
   need('libprep', 'Library preparation');
   need('flowcell', 'Flow cell');
   need('qc', 'QC required');
@@ -1071,6 +1141,18 @@ function collect() {
   const material = document.querySelector('input[name="material"]:checked');
   if (material)
     submission.push([L(APP.sample_material.label), material.value]);
+
+  /* The QC panel is inserted AFTER #choice-fields, so the loop above never saw
+   * it - and on the Q/Q form that panel is the entire order. Every submitted
+   * Q/Q file went out naming no service at all. Collected explicitly. */
+  if (APP.qc_panel) {
+    document.querySelectorAll('.qc-panel .field').forEach(w => {
+      if (hiddenField(w)) return;
+      const el = w.querySelector('select, input[type="text"]');
+      if (!el || !el.value.trim()) return;
+      submission.push([L(labelText(w.querySelector('label'))), el.value.trim()]);
+    });
+  }
 
   /* The flow cell also goes out under its CATALOG name, so the submission, the
    * quote and the lab report all name one service (D6). */

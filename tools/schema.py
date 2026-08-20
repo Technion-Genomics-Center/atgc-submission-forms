@@ -387,6 +387,16 @@ def build_spec(app, surveyed):
                 f"that is not in this table. The layout it borrows from has "
                 f"changed; fix the registry rather than leaving a dead rule.")
 
+    # Columns the workbook never had. The Q/Q workbook asks only for a name and
+    # remarks, but the service IS measuring, so the researcher must be able to
+    # state what they already measured and on what.
+    for col in app.get("add_columns", []):
+        if col not in columns:
+            pos = next((i for i, c in enumerate(columns)
+                        if c.lower().startswith("remarks")), len(columns))
+            columns.insert(pos, col)
+            report["added"].append(f"column added: {col}")
+
     for drop in app.get("drop_columns", []):
         if drop in columns:
             columns.remove(drop)
@@ -558,8 +568,14 @@ def build_spec(app, surveyed):
         "quant_options": QUANT_OPTIONS,
         "group": GROUP_OF.get(app["slug"], "transcriptomics"),
         "columns": columns,
-        "extraction_columns": (EXTRACTION_COLUMNS
+        # doc 05 §11.2 — the shared extraction table, unless a form needs its
+        # own. CLA extracts from cell lines only, so "tissue weight" is a
+        # column nobody can fill.
+        "extraction_columns": (app.get("extraction_columns") or EXTRACTION_COLUMNS
                                if app.get("extraction") else None),
+        # Where only one extraction service exists, asking which is a dropdown
+        # with one answer. Ask Yes/No and stop.
+        "extraction_no_kit": app.get("extraction_no_kit", False),
         "qc_panel": app.get("qc_panel"),
         "no_qc": app.get("no_qc", False),
         "no_flowcell": app.get("no_flowcell", False),
