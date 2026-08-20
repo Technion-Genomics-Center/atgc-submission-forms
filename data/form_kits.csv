@@ -1,7 +1,7 @@
 ﻿application_slug,library_prep,note
 rnaseq,NEBNext Ultra II Directional RNA Library Prep,
 rnaseq,NEBNext Directional RNA Library Prep [rRNA removal bacteria],
-rnaseq,NEBNext directional RNA library prep [rRNA & globin removal],
+rnaseq,NEBNext directional RNA library prep [rRNA & globin removal],"quoted once, never run - Nitsan 2026-08-19 will add the recipe if a project comes"
 rnaseq,Illumina Stranded RiboZero Plus low-input Library Prep,
 rnaseq,SMART-seq rRNA depletion H/M/R library prep,
 rnaseq,Other,
