@@ -146,6 +146,15 @@ td input, td select { border: 0; border-radius: 0; margin: 0; background: transp
 tbody tr:nth-child(even) { background: var(--surface-alt); }
 td.rownum { padding: 0 .5rem; color: var(--ink-soft); text-align: right; }
 
+/* One block per instrument on the Q/Q form: a heading, its own count, its own
+ * table. Spaced apart so two tables never read as one long one. */
+.sample-block { margin-top: 1.25rem; }
+.sample-block:first-of-type { margin-top: .25rem; }
+.sample-block h3 {
+  margin: 0 0 .5rem;
+  font: 600 var(--fs-body) var(--font-head); color: var(--navy);
+}
+
 /* ── bioinformatics ───────────────────────────────────────────────────── */
 .consult {
   margin: 0 0 .9rem; padding: .7rem .9rem;

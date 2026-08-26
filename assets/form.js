@@ -271,6 +271,18 @@ function renderChoices() {
         if (typeWrap) $('#c-exttype').value = '';
       }
 
+      /* An extraction includes QC, so while it is wanted the QC question is
+       * withdrawn and cleared — asking would offer something already being
+       * given, and a stale Yes would order it twice. */
+      if (APP.qc_with_extraction) {
+        const qcWrap = $('[data-field="qc"]');
+        if (qcWrap) {
+          qcWrap.hidden = !!on;
+          if (on) $('#c-qc').value = '';
+          else if (!$('#c-qc').value) $('#c-qc').value = 'Yes';
+        }
+      }
+
       /* doc 05 §11.2 — the note the RNAseq-extraction workbook carried. */
       let note = $('#extraction-note');
       if (on && !note) {
@@ -467,6 +479,8 @@ function renderQcPanel() {
      * the box that belongs to it. */
     syncOther();
   };
+  on('#c-qubit', 'change', () => { syncSplitVisibility(); validate(); });
+  on('#c-tapestation', 'change', () => { syncSplitVisibility(); validate(); });
   on('#c-tapestation', 'change', syncTs);
   on('#c-tstype', 'change', syncTs);
   syncTs();
@@ -474,6 +488,7 @@ function renderQcPanel() {
 
 function renderSamples() {
   $('#naming-rules').textContent = NAMING_TEXT;
+  if (APP.sample_tables) return renderSplitTables();
   const t = $('#samples');
   const cols = activeColumns();
   t.innerHTML =
@@ -481,6 +496,83 @@ function renderSamples() {
     cols.map(c => `<th>${c}</th>`).join('') +
     '</tr></thead><tbody></tbody>';
   setRows(1);
+}
+
+/* ── one table per instrument, doc 05 §16.8 ────────────────────────────────
+ * Q/Q is the only form where a single table cannot describe the submission:
+ * three tubes for Qubit and one for TapeStation is a normal order, and one
+ * table cannot say which tube is for which instrument.
+ *
+ * Deliberately self-contained rather than a generalisation of the single-table
+ * machinery, which 17 working forms depend on. Each block is a heading, its own
+ * sample count and its own table, shown only when its instrument is wanted.
+ *
+ * The blank-table download and the upload are hidden here: they exist for
+ * plates of 96, and this form takes a handful of tubes. Two tables would also
+ * make "upload a filled table" ambiguous about which one.
+ */
+function splitTables() {
+  return (APP.sample_tables || []).map(t => ({
+    ...t,
+    table: document.getElementById('samples-' + t.id),
+    count: document.getElementById('row-count-' + t.id),
+    block: document.getElementById('block-' + t.id),
+  })).filter(t => t.table);
+}
+
+function renderSplitTables() {
+  const tools = document.querySelector('.table-tools');
+  if (tools) tools.hidden = true;
+  const host = $('#samples').closest('.table-scroll').parentElement;
+  const cols = activeColumns();
+
+  $('#samples').closest('.table-scroll').hidden = true;
+  APP.sample_tables.forEach(t => {
+    if (document.getElementById('block-' + t.id)) return;
+    const div = document.createElement('div');
+    div.id = 'block-' + t.id;
+    div.className = 'sample-block';
+    div.innerHTML =
+      `<h3>${t.title}</h3>` +
+      `<div class="table-tools"><label>Number of samples` +
+      `<input type="number" id="row-count-${t.id}" min="1" value="1" step="1">` +
+      `</label></div>` +
+      `<div class="table-scroll"><table id="samples-${t.id}"></table></div>`;
+    host.appendChild(div);
+    div.querySelector('input').addEventListener('change', e => {
+      setSplitRows(t.id, Math.max(1, Math.min(MAX_ROWS,
+        parseInt(e.target.value, 10) || 1)));
+      validate(); saveDraft();
+    });
+  });
+
+  splitTables().forEach(t => {
+    t.table.innerHTML = '<thead><tr><th></th>' +
+      cols.map(c => `<th>${c}</th>`).join('') + '</tr></thead><tbody></tbody>';
+    setSplitRows(t.id, 1);
+  });
+  syncSplitVisibility();
+}
+
+function setSplitRows(id, n) {
+  const t = splitTables().find(x => x.id === id);
+  if (!t) return;
+  const body = t.table.querySelector('tbody');
+  while (body.rows.length > n) body.deleteRow(-1);
+  while (body.rows.length < n) {
+    const tr = body.insertRow();
+    tr.innerHTML = `<td class="rownum">${body.rows.length}</td>` +
+      activeColumns().map(c => `<td>${cell(c)}</td>`).join('');
+  }
+  if (t.count) t.count.value = body.rows.length;
+}
+
+/* A table for an instrument nobody ordered is a table nobody should fill. */
+function syncSplitVisibility() {
+  splitTables().forEach(t => {
+    const gate = document.getElementById('c-' + t.when);
+    t.block.hidden = !!gate && gate.value !== 'Yes';
+  });
 }
 
 /* Swap the columns without losing what has been typed: anything whose column
@@ -558,6 +650,14 @@ function cell(col) {
       APP.quant_options.map(o => `<option>${o}</option>`).join('') + '</select>';
   }
   return `<input data-col="${col}">`;
+}
+
+/* Every sample row currently on the page. One table on seventeen forms, two on
+ * Q/Q — the validator and the exporter should not care which. */
+function allSampleRows() {
+  if (!APP.sample_tables) return [...document.querySelectorAll('#samples tbody tr')];
+  return splitTables().filter(t => !t.block.hidden)
+    .flatMap(t => [...t.table.querySelectorAll('tbody tr')]);
 }
 
 const rowHasData = tr =>
@@ -912,7 +1012,7 @@ function validate() {
   need('analysis', 'Bioinformatic analysis — yes or no');
 
   const seen = new Set();
-  [...$('#samples tbody').rows].forEach((tr, i) => {
+  allSampleRows().forEach((tr, i) => {
     const get = c => { const el = tr.querySelector(`[data-col="${c}"]`); return el ? el.value.trim() : ''; };
     const name = get('Sample name');
     if (name) {
@@ -968,7 +1068,7 @@ function snapshot() {
                             'input[type="checkbox"][name]:checked').forEach(el => {
     (d.groups[el.name] = d.groups[el.name] || []).push(el.value);
   });
-  [...$('#samples tbody').rows].forEach(tr =>
+  allSampleRows().forEach(tr =>
     d.rows.push([...tr.querySelectorAll('input,select')].map(i => i.value)));
   return d;
 }
@@ -989,7 +1089,7 @@ function offerRestore() {
 }
 
 function applyDraft(d) {
-  setRows(d.rows.length || 1);
+  if (!APP.sample_tables) setRows(d.rows.length || 1);
   Object.entries(d.fields).forEach(([id, v]) => { const el = document.getElementById(id); if (el) el.value = v; });
   Object.entries(d.groups || {}).forEach(([name, vals]) => {
     document.querySelectorAll(`input[name="${name}"]`).forEach(el => {
@@ -998,9 +1098,25 @@ function applyDraft(d) {
   });
   if ($('#c-analysis') && $('#c-analysis').value === 'Yes')
     $('#c-analysis').dispatchEvent(new Event('change'));
-  [...$('#samples tbody').rows].forEach((tr, r) =>
-    [...tr.querySelectorAll('input,select')].forEach((inp, c) => {
-      inp.value = (d.rows[r] || [])[c] || ''; }));
+  /* Restore across whichever tables the form has. The visible tables depend on
+   * the answers restored just above, so re-sync before filling. */
+  if (APP.sample_tables) {
+    syncSplitVisibility();
+    let r = 0;
+    splitTables().filter(t => !t.block.hidden).forEach(t => {
+      const mine = d.rows.slice(r).length;
+      setSplitRows(t.id, Math.max(1, Math.min(mine, d.rows.length - r) || 1));
+      [...t.table.querySelectorAll('tbody tr')].forEach(tr => {
+        [...tr.querySelectorAll('input,select')].forEach((inp, c) => {
+          inp.value = (d.rows[r] || [])[c] || ''; });
+        r++;
+      });
+    });
+  } else {
+    [...$('#samples tbody').rows].forEach((tr, r) =>
+      [...tr.querySelectorAll('input,select')].forEach((inp, c) => {
+        inp.value = (d.rows[r] || [])[c] || ''; }));
+  }
   validate();
 }
 
@@ -1175,17 +1291,30 @@ function collect() {
   }
 
   /* ── sheet 2: the samples ──────────────────────────────────────────────── */
-  const samples = [['#', ...activeColumns()].map(K)];
-  [...document.querySelectorAll('#samples tbody tr')].forEach((tr, i) => {
-    if (!rowHasData(tr)) return;                // never export empty rows
-    samples.push([i + 1, ...[...tr.querySelectorAll('input,select')].map(el => el.value.trim())]);
-  });
+  const sheetFor = rows => {
+    const out = [['#', ...activeColumns()].map(K)];
+    rows.forEach((tr, i) => {
+      if (!rowHasData(tr)) return;              // never export empty rows
+      out.push([i + 1, ...[...tr.querySelectorAll('input,select')].map(el => el.value.trim())]);
+    });
+    return out;
+  };
+  const samples = sheetFor(allSampleRows());
 
   const sheets = [
     { name: 'Submission', rows: submission, cols: [34, 62] },
-    { name: 'Samples', rows: samples,
-      cols: [5, ...activeColumns().map(c => c === 'Remarks' ? 34 : 16)] },
   ];
+  const widths = [5, ...activeColumns().map(c => c === 'Remarks' ? 34 : 16)];
+  if (APP.sample_tables) {
+    /* One sheet per instrument, named for it, so the lab can see at a glance
+     * that three tubes are for Qubit and one is for TapeStation. */
+    splitTables().filter(t => !t.block.hidden).forEach(t => {
+      const rows = sheetFor([...t.table.querySelectorAll('tbody tr')]);
+      if (rows.length > 1) sheets.push({ name: t.title, rows, cols: widths });
+    });
+  } else {
+    sheets.push({ name: 'Samples', rows: samples, cols: widths });
+  }
 
   /* ── sheet 3: analysis, only when there is any ─────────────────────────── */
   const panel = document.querySelectorAll('#analysis-panel textarea');
@@ -1346,7 +1475,7 @@ async function uploadTable(file) {
   }
 
   const body = rows.slice(1);
-  const filled = [...document.querySelectorAll('#samples tbody tr')].filter(rowHasData).length;
+  const filled = allSampleRows().filter(rowHasData).length;
   if (filled && !confirm(
         `${filled} row(s) already have data. Replace them with ${body.length} ` +
         'row(s) from the file?')) return;
@@ -1483,7 +1612,7 @@ async function importQuote(file) {
   if (unmatched.length && !filled.some(f => f !== 'quote number'))
     warn.push('Nothing on this quote matches the ' + APP.name +
               ' form — check you are on the right form.');
-  const n = [...document.querySelectorAll('#samples tbody tr')].filter(rowHasData).length;
+  const n = allSampleRows().filter(rowHasData).length;
   const qty = (q.services || []).reduce((m, s) => Math.max(m, s.quantity || 0), 0);
   if (qty && n > qty)
     warn.push(`You have ${n} samples but the quote covers ${qty}.`);
