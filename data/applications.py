@@ -208,7 +208,13 @@ FORM_PREPS = _load_form_kits()
 
 RULES = {
     # ── sequencing forms with an analysis panel ─────────────────────────────
-    "rnaseq": dict(analysis=RNASEQ,
+    "rnaseq": dict(
+         # Nitsan, 2026-08-19. An extraction already includes QC, so
+         # asking is asking for something the researcher is getting
+         # anyway. Ask only when they are NOT sending material to
+         # extract.
+         qc_with_extraction=True,
+         analysis=RNASEQ,
          # doc 05 §11 — RNAseq-extraction folded in behind a Yes/No.
          extraction="rna",
          # Nitsan, 2026-08-12. The workbook offered one vague "[rRNA removal]"
@@ -217,7 +223,11 @@ RULES = {
          # quote can then pick the one they were quoted.
          ),
 
-    "scrna-seq-10x": dict(analysis=SCRNA,
+    "scrna-seq-10x": dict(
+         # Nitsan, 2026-08-19. Sample QC is not asked here: these
+         # services measure the material as part of the run.
+         no_qc=True,
+         analysis=SCRNA,
          # Nitsan, 2026-08-17. "Illumina/Fluent scRNA-seq library prep" is GONE
          # from this form. Fluent is the old name for Illumina scRNA-seq, which
          # now has a form of its own listing the four real kits (§12.1), so
@@ -251,7 +261,11 @@ RULES = {
     # layout: same question (how many cells, how viable), same sample table.
     # The KITS are not shared, and come from data/form_kits.csv, which wins
     # outright over anything the borrowed Setting sheet lists.
-    "illumina-scrna-seq": dict(analysis=SCRNA,
+    "illumina-scrna-seq": dict(
+         # Nitsan, 2026-08-19. Sample QC is not asked here: these
+         # services measure the material as part of the run.
+         no_qc=True,
+         analysis=SCRNA,
          # Same reasoning as 10X (doc 05 §20a): the read configuration is fixed
          # by the kit and set by the lab, so the researcher is not asked.
          flowcell_cycles=100,
@@ -268,7 +282,11 @@ RULES = {
          # entry. Ask before adding one.
          ),
 
-    "spatial-transcriptomics": dict(analysis=SPATIAL,
+    "spatial-transcriptomics": dict(
+         # Nitsan, 2026-08-19. Sample QC is not asked here: these
+         # services measure the material as part of the run.
+         no_qc=True,
+         analysis=SPATIAL,
          # Nitsan, 2026-08-16. Same reasoning as 10X scRNA-seq: a Visium HD
          # library is read at a fixed length on a 100-cycle kit, and the run
          # parameters follow the chemistry. These apply to the Visium kits
@@ -414,7 +432,16 @@ RULES = {
          # NextSeq questions do not apply. The library prep still does.
          no_flowcell=True),
 
-    "mirna-seq": dict(analysis=None, extraction="rna"),
+    "mirna-seq": dict(
+         # Nitsan, 2026-08-19. One extraction service applies to miRNA, so
+         # the kit dropdown would hold a single answer.
+         extraction_no_kit=True,
+         # Nitsan, 2026-08-19. An extraction already includes QC, so
+         # asking is asking for something the researcher is getting
+         # anyway. Ask only when they are NOT sending material to
+         # extract.
+         qc_with_extraction=True,
+         analysis=None, extraction="rna"),
 
     # ── no bioinformatics question at all, doc 05 §12.5 ─────────────────────
     "cell-line-authentication": dict(analysis=None, no_analysis_question=True,
@@ -449,6 +476,15 @@ RULES = {
          # importing it back would be circular. canonical_column() maps
          # every spelling of this header to exactly this string.
          add_columns=["ng/ul", "Quantified by"],
+         # Nitsan, 2026-08-19. One table cannot describe this submission: three
+         # tubes for Qubit and one for TapeStation is a normal order, and the
+         # lab needs to know which tube is for which instrument. Each table
+         # appears only when its instrument is wanted, carries its own sample
+         # count, and exports as its own sheet.
+         sample_tables=[
+             dict(id="qubit", title="Qubit samples", when="qubit"),
+             dict(id="tapestation", title="TapeStation samples", when="tapestation"),
+         ],
          qc_panel=dict(
              guide_url=SITE + "dna-rna-quality-and-quantity/",
              note=("Please supply samples at the concentration the kit requires "

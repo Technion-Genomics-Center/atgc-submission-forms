@@ -576,6 +576,14 @@ def build_spec(app, surveyed):
         # Where only one extraction service exists, asking which is a dropdown
         # with one answer. Ask Yes/No and stop.
         "extraction_no_kit": app.get("extraction_no_kit", False),
+        # An extraction already includes QC, so the QC question is
+        # withdrawn while extraction is wanted rather than asking for
+        # something the researcher is getting anyway.
+        "qc_with_extraction": app.get("qc_with_extraction", False),
+        # Forms where one table cannot describe the submission. Q/Q is
+        # the case: three tubes for Qubit and one for TapeStation is a
+        # normal order, and a single table cannot say which is which.
+        "sample_tables": app.get("sample_tables"),
         "qc_panel": app.get("qc_panel"),
         "no_qc": app.get("no_qc", False),
         "no_flowcell": app.get("no_flowcell", False),
