@@ -23,3 +23,7 @@ desktop.ini
 
 # The generated shotgun workbook is a handover artefact, not source.
 Shotgun-metagenomics-*.xlsx
+
+# Internal helper files for the lab (website go-live notes). Kept on the share,
+# never committed: this repo is public, and these are not for researchers.
+website/
