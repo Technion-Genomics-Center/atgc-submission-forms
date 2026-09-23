@@ -108,7 +108,7 @@ LABS = [
     {
         "id": "emerson",
         "label": "Emerson",
-        "to": ["nitsanf@technion.ac.il", "angelao@technion.ac.il"],
+        "to": ["nitsanf@technion.ac.il", "Angelikao@technion.ac.il"],
         "address": ["Technion Genomics Center",
                     "Room 2-2, 2nd floor, Emerson building",
                     "Technion campus"],
