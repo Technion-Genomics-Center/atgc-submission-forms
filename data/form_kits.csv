@@ -5,6 +5,7 @@ rnaseq,NEBNext directional RNA library prep [rRNA & globin removal],"quoted once
 rnaseq,Illumina Stranded RiboZero Plus low-input Library Prep,
 rnaseq,SMART-seq rRNA depletion H/M/R library prep,
 rnaseq,Other,
+rnaseq,SMART-seq ultra-low input library prep,
 mirna-seq,miRNA-seq library prep,
 mirna-seq,Other,
 metagenomics-16s-18s,16S library prep,
