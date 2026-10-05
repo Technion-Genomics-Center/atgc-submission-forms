@@ -476,15 +476,22 @@ RULES = {
          # importing it back would be circular. canonical_column() maps
          # every spelling of this header to exactly this string.
          add_columns=["ng/ul", "Quantified by"],
-         # Nitsan, 2026-08-19. One table cannot describe this submission: three
-         # tubes for Qubit and one for TapeStation is a normal order, and the
-         # lab needs to know which tube is for which instrument. Each table
-         # appears only when its instrument is wanted, carries its own sample
-         # count, and exports as its own sheet.
-         sample_tables=[
-             dict(id="qubit", title="Qubit samples", when="qubit"),
-             dict(id="tapestation", title="TapeStation samples", when="tapestation"),
-         ],
+         # Nitsan, 2026-10-05. ONE table, with a tick per instrument - replacing
+         # the table-per-instrument built on 2026-08-19. The same tube usually
+         # goes to both instruments, so the row is the tube and the ticks say
+         # what to run on it. Two tables made the researcher write that tube out
+         # twice and made the lab reconcile the copies.
+         #
+         # The ticks appear ONLY when both instruments are ordered. With one
+         # instrument every row is for that instrument, and a column of
+         # identical ticks is a question with one answer.
+         service_columns=[dict(column="Qubit", gate="qubit"),
+                          dict(column="TapeStation", gate="tapestation")],
+         # Nitsan, 2026-10-05: do NOT make unique sample names a rule here. The
+         # same name legitimately appears more than once on this form - the same
+         # material measured twice, or two aliquots of one tube - and rule 5
+         # was rejecting honest submissions.
+         allow_duplicate_names=True,
          qc_panel=dict(
              guide_url=SITE + "dna-rna-quality-and-quantity/",
              note=("Please supply samples at the concentration the kit requires "

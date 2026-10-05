@@ -145,15 +145,11 @@ td { padding: 0; border-top: 1px solid var(--rule); }
 td input, td select { border: 0; border-radius: 0; margin: 0; background: transparent; }
 tbody tr:nth-child(even) { background: var(--surface-alt); }
 td.rownum { padding: 0 .5rem; color: var(--ink-soft); text-align: right; }
+/* A tick column says which instrument a tube is for, so the box sits in the
+ * middle of its cell rather than stretching like a text input. */
+td input[type="checkbox"] { width: auto; margin: .35rem auto; display: block; }
+th { white-space: nowrap; }
 
-/* One block per instrument on the Q/Q form: a heading, its own count, its own
- * table. Spaced apart so two tables never read as one long one. */
-.sample-block { margin-top: 1.25rem; }
-.sample-block:first-of-type { margin-top: .25rem; }
-.sample-block h3 {
-  margin: 0 0 .5rem;
-  font: 600 var(--fs-body) var(--font-head); color: var(--navy);
-}
 
 /* ── bioinformatics ───────────────────────────────────────────────────── */
 .consult {

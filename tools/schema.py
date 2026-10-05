@@ -580,10 +580,11 @@ def build_spec(app, surveyed):
         # withdrawn while extraction is wanted rather than asking for
         # something the researcher is getting anyway.
         "qc_with_extraction": app.get("qc_with_extraction", False),
-        # Forms where one table cannot describe the submission. Q/Q is
-        # the case: three tubes for Qubit and one for TapeStation is a
-        # normal order, and a single table cannot say which is which.
-        "sample_tables": app.get("sample_tables"),
+        # Per-sample tick columns, added only when more than one of their
+        # gates is answered Yes (doc 05 §16.8).
+        "service_columns": app.get("service_columns"),
+        # doc 05 §18.1 rule 5 does not apply where the same name is legitimate.
+        "allow_duplicate_names": app.get("allow_duplicate_names", False),
         "qc_panel": app.get("qc_panel"),
         "no_qc": app.get("no_qc", False),
         "no_flowcell": app.get("no_flowcell", False),
