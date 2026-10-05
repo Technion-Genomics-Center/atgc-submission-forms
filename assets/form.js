@@ -396,29 +396,37 @@ function dropEmptySections() {
 /* Which set of columns applies right now. Asking for extraction means sending
  * material, so concentration and purity cannot be known yet; asking for none
  * means the nucleic acid is already measured. */
-/* Tick columns for the instruments actually ordered — but only when more than
- * one is, because a single instrument makes every row identical (doc 05 §16.8). */
-function serviceColumns() {
-  const cfg = APP.service_columns || [];
-  if (cfg.length < 2) return [];
-  const on = cfg.filter(c => {
-    const gate = $('#c-' + c.gate);
+/* Which instruments were ordered, in the order the form asks about them. */
+function orderedInstruments() {
+  const cfg = APP.run_on_column;
+  if (!cfg) return [];
+  return cfg.options.filter(o => {
+    const gate = $('#c-' + o.gate);
     return gate && gate.value === 'Yes';
-  });
-  return on.length >= 2 ? on.map(c => c.column) : [];
+  }).map(o => o.label);
+}
+
+/* The per-sample instrument column, and only when more than one instrument is
+ * ordered — with one, every row would carry the same answer (doc 05 §16.8). */
+function serviceColumns() {
+  return orderedInstruments().length >= 2 ? [APP.run_on_column.column] : [];
 }
 
 function activeColumns() {
   const wantsExtraction = APP.extraction_always ||
     ($('#c-needext') && $('#c-needext').value === 'Yes');
   const base = (wantsExtraction && APP.extraction_columns) || APP.columns;
-  const ticks = serviceColumns();
-  if (!ticks.length) return base;
+  const extra = serviceColumns();
+  if (!extra.length) return base;
+  /* Columns the chosen instruments make unnecessary — we are about to measure
+   * that ourselves. */
+  const gone = (APP.run_on_column.drops_columns || []);
+  const kept = base.filter(c => !gone.includes(c));
   /* Before Remarks, which stays last: it is where anything the columns did not
    * ask for goes. */
-  const at = base.findIndex(c => c.toLowerCase().startsWith('remarks'));
-  const i = at === -1 ? base.length : at;
-  return base.slice(0, i).concat(ticks, base.slice(i));
+  const at = kept.findIndex(c => c.toLowerCase().startsWith('remarks'));
+  const i = at === -1 ? kept.length : at;
+  return kept.slice(0, i).concat(extra, kept.slice(i));
 }
 
 /* DNA/RNA quality and quantity is not a step before sequencing — measuring IS
@@ -588,8 +596,15 @@ function cell(col) {
     return `<select data-col="${col}"><option value=""></option>` +
       APP.sample_library_types.map(o => `<option>${o}</option>`).join('') + '</select>';
   }
-  if ((APP.service_columns || []).some(c => c.column === col)) {
-    return `<input type="checkbox" data-col="${col}">`;
+  /* Defaults to Both, because that is what almost every submission wants.
+   * data-default marks it as an answer nobody typed, so a row carrying only
+   * this is still an empty row — see rowHasData. */
+  if (APP.run_on_column && col === APP.run_on_column.column) {
+    const cfg = APP.run_on_column;
+    return `<select data-col="${col}" data-default="1">` +
+      [cfg.both, ...orderedInstruments()]
+        .map((o, i) => `<option${i === 0 ? ' selected' : ''}>${o}</option>`).join('') +
+      '</select>';
   }
   if (col === APP.quant_column) {
     return `<select data-col="${col}"><option value=""></option>` +
@@ -615,8 +630,14 @@ const cellWrite = (el, v) => {
   else el.value = v == null ? '' : v;
 };
 
+/* A column that answers itself is not evidence the row was filled in: the
+ * instrument column starts at Both, and counting it would make every blank row
+ * look used — breaking the row count, the "rows contain data" warning, and the
+ * rule that empty rows are never exported. */
 const rowHasData = tr =>
-  [...tr.querySelectorAll('input,select')].some(i => cellRead(i));
+  [...tr.querySelectorAll('input,select')]
+    .filter(el => !el.dataset.default)
+    .some(el => cellRead(el));
 
 /* ── bioinformatics, always the final section ──────────────────────────── */
 function renderBioinformatics() {

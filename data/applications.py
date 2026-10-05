@@ -482,11 +482,36 @@ RULES = {
          # what to run on it. Two tables made the researcher write that tube out
          # twice and made the lab reconcile the copies.
          #
-         # The ticks appear ONLY when both instruments are ordered. With one
-         # instrument every row is for that instrument, and a column of
-         # identical ticks is a question with one answer.
-         service_columns=[dict(column="Qubit", gate="qubit"),
-                          dict(column="TapeStation", gate="tapestation")],
+         # ONE column, not a tick per instrument: Nitsan, 2026-10-05 - wanting
+         # both instruments almost always means wanting both for every sample,
+         # so the column defaults to Both and the common submission needs no
+         # per-row work at all.
+         #
+         # It appears ONLY when both instruments are ordered. TapeStation-only
+         # projects are common, and there every row is TapeStation: a column
+         # with one possible answer is noise.
+         #
+         # "Instrument requested", not "Instrument" and not "Application":
+         #   - the table already has `Quantified by`, holding Qubit / Tapestation
+         #     / Nanodrop, which is what the researcher ALREADY measured on. Two
+         #     adjacent columns of instrument names, one meaning "did" and one
+         #     meaning "please do", is a misreading waiting to happen.
+         #   - "application" means the form itself across this platform
+         #     (rnaseq, dna-rna-quality-quantity) and ProjectHub keys off it.
+         run_on_column=dict(
+             column="Instrument requested",
+             both="Both",
+             # Nitsan, 2026-10-05. With both instruments ordered we run the
+             # Qubit ourselves, so asking the researcher for a concentration
+             # and the instrument they measured it on is asking for work we are
+             # about to do. Dropped while both are ordered.
+             #
+             # They stay for TapeStation alone, where the concentration is what
+             # decides which TapeStation kit to use and nobody has measured it
+             # for us.
+             drops_columns=["ng/ul", "Quantified by"],
+             options=[dict(label="Qubit", gate="qubit"),
+                      dict(label="TapeStation", gate="tapestation")]),
          # Nitsan, 2026-10-05: do NOT make unique sample names a rule here. The
          # same name legitimately appears more than once on this form - the same
          # material measured twice, or two aliquots of one tube - and rule 5

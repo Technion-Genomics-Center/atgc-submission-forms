@@ -145,9 +145,6 @@ td { padding: 0; border-top: 1px solid var(--rule); }
 td input, td select { border: 0; border-radius: 0; margin: 0; background: transparent; }
 tbody tr:nth-child(even) { background: var(--surface-alt); }
 td.rownum { padding: 0 .5rem; color: var(--ink-soft); text-align: right; }
-/* A tick column says which instrument a tube is for, so the box sits in the
- * middle of its cell rather than stretching like a text input. */
-td input[type="checkbox"] { width: auto; margin: .35rem auto; display: block; }
 th { white-space: nowrap; }
 
 
