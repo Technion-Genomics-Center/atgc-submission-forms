@@ -145,6 +145,11 @@ td { padding: 0; border-top: 1px solid var(--rule); }
 td input, td select { border: 0; border-radius: 0; margin: 0; background: transparent; }
 tbody tr:nth-child(even) { background: var(--surface-alt); }
 td.rownum { padding: 0 .5rem; color: var(--ink-soft); text-align: right; }
+
+/* A row asking for one instrument instead of Both. Set on the td, not the tr,
+ * so it beats the even-row banding without needing !important. */
+tbody tr.one-instrument > td { background: var(--warn-bg); }
+tbody tr.one-instrument > td:first-child { box-shadow: inset 3px 0 0 var(--warn); }
 th { white-space: nowrap; }
 
 
