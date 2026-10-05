@@ -501,15 +501,17 @@ RULES = {
          run_on_column=dict(
              column="Instrument requested",
              both="Both",
-             # Nitsan, 2026-10-05. With both instruments ordered we run the
-             # Qubit ourselves, so asking the researcher for a concentration
-             # and the instrument they measured it on is asking for work we are
-             # about to do. Dropped while both are ordered.
+             # Nitsan, 2026-10-05. Ordering the Qubit at all means we measure
+             # the concentration ourselves, so asking the researcher for it -
+             # and for the instrument they measured it on - is asking for work
+             # we are about to do. Dropped whenever Qubit is ordered, with or
+             # without TapeStation.
              #
-             # They stay for TapeStation alone, where the concentration is what
+             # They stay for TapeStation ALONE, where the concentration is what
              # decides which TapeStation kit to use and nobody has measured it
              # for us.
              drops_columns=["ng/ul", "Quantified by"],
+             drops_when="qubit",
              options=[dict(label="Qubit", gate="qubit"),
                       dict(label="TapeStation", gate="tapestation")]),
          # Nitsan, 2026-10-05: do NOT make unique sample names a rule here. The

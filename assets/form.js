@@ -416,12 +416,23 @@ function activeColumns() {
   const wantsExtraction = APP.extraction_always ||
     ($('#c-needext') && $('#c-needext').value === 'Yes');
   const base = (wantsExtraction && APP.extraction_columns) || APP.columns;
+  const cfg = APP.run_on_column;
+  if (!cfg) return base;
+
+  /* Two independent decisions, and they do not switch at the same moment.
+   *
+   * Columns go away as soon as the instrument that measures them is ordered —
+   * Qubit alone is enough, because we are about to measure the concentration
+   * ourselves. The per-row instrument column only appears once there are two
+   * instruments to choose between. */
+  const gate = cfg.drops_when && $('#c-' + cfg.drops_when);
+  const measuredByUs = !!gate && gate.value === 'Yes';
+  const kept = measuredByUs
+    ? base.filter(c => !(cfg.drops_columns || []).includes(c))
+    : base;
+
   const extra = serviceColumns();
-  if (!extra.length) return base;
-  /* Columns the chosen instruments make unnecessary — we are about to measure
-   * that ourselves. */
-  const gone = (APP.run_on_column.drops_columns || []);
-  const kept = base.filter(c => !gone.includes(c));
+  if (!extra.length) return kept;
   /* Before Remarks, which stays last: it is where anything the columns did not
    * ask for goes. */
   const at = kept.findIndex(c => c.toLowerCase().startsWith('remarks'));
