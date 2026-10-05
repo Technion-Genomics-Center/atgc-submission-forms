@@ -396,10 +396,48 @@ function dropEmptySections() {
 /* Which set of columns applies right now. Asking for extraction means sending
  * material, so concentration and purity cannot be known yet; asking for none
  * means the nucleic acid is already measured. */
+/* Which instruments were ordered, in the order the form asks about them. */
+function orderedInstruments() {
+  const cfg = APP.run_on_column;
+  if (!cfg) return [];
+  return cfg.options.filter(o => {
+    const gate = $('#c-' + o.gate);
+    return gate && gate.value === 'Yes';
+  }).map(o => o.label);
+}
+
+/* The per-sample instrument column, and only when more than one instrument is
+ * ordered — with one, every row would carry the same answer (doc 05 §16.8). */
+function serviceColumns() {
+  return orderedInstruments().length >= 2 ? [APP.run_on_column.column] : [];
+}
+
 function activeColumns() {
   const wantsExtraction = APP.extraction_always ||
     ($('#c-needext') && $('#c-needext').value === 'Yes');
-  return (wantsExtraction && APP.extraction_columns) || APP.columns;
+  const base = (wantsExtraction && APP.extraction_columns) || APP.columns;
+  const cfg = APP.run_on_column;
+  if (!cfg) return base;
+
+  /* Two independent decisions, and they do not switch at the same moment.
+   *
+   * Columns go away as soon as the instrument that measures them is ordered —
+   * Qubit alone is enough, because we are about to measure the concentration
+   * ourselves. The per-row instrument column only appears once there are two
+   * instruments to choose between. */
+  const gate = cfg.drops_when && $('#c-' + cfg.drops_when);
+  const measuredByUs = !!gate && gate.value === 'Yes';
+  const kept = measuredByUs
+    ? base.filter(c => !(cfg.drops_columns || []).includes(c))
+    : base;
+
+  const extra = serviceColumns();
+  if (!extra.length) return kept;
+  /* Before Remarks, which stays last: it is where anything the columns did not
+   * ask for goes. */
+  const at = kept.findIndex(c => c.toLowerCase().startsWith('remarks'));
+  const i = at === -1 ? kept.length : at;
+  return kept.slice(0, i).concat(extra, kept.slice(i));
 }
 
 /* DNA/RNA quality and quantity is not a step before sequencing — measuring IS
@@ -479,8 +517,10 @@ function renderQcPanel() {
      * the box that belongs to it. */
     syncOther();
   };
-  on('#c-qubit', 'change', () => { syncSplitVisibility(); validate(); });
-  on('#c-tapestation', 'change', () => { syncSplitVisibility(); validate(); });
+  /* Ordering a second instrument adds the tick columns, and dropping back to
+   * one removes them. reshapeSamples keeps whatever was already typed. */
+  on('#c-qubit', 'change', () => { reshapeSamples(); validate(); });
+  on('#c-tapestation', 'change', () => { reshapeSamples(); validate(); });
   on('#c-tapestation', 'change', syncTs);
   on('#c-tstype', 'change', syncTs);
   syncTs();
@@ -488,7 +528,6 @@ function renderQcPanel() {
 
 function renderSamples() {
   $('#naming-rules').textContent = NAMING_TEXT;
-  if (APP.sample_tables) return renderSplitTables();
   const t = $('#samples');
   const cols = activeColumns();
   t.innerHTML =
@@ -496,83 +535,6 @@ function renderSamples() {
     cols.map(c => `<th>${c}</th>`).join('') +
     '</tr></thead><tbody></tbody>';
   setRows(1);
-}
-
-/* ── one table per instrument, doc 05 §16.8 ────────────────────────────────
- * Q/Q is the only form where a single table cannot describe the submission:
- * three tubes for Qubit and one for TapeStation is a normal order, and one
- * table cannot say which tube is for which instrument.
- *
- * Deliberately self-contained rather than a generalisation of the single-table
- * machinery, which 17 working forms depend on. Each block is a heading, its own
- * sample count and its own table, shown only when its instrument is wanted.
- *
- * The blank-table download and the upload are hidden here: they exist for
- * plates of 96, and this form takes a handful of tubes. Two tables would also
- * make "upload a filled table" ambiguous about which one.
- */
-function splitTables() {
-  return (APP.sample_tables || []).map(t => ({
-    ...t,
-    table: document.getElementById('samples-' + t.id),
-    count: document.getElementById('row-count-' + t.id),
-    block: document.getElementById('block-' + t.id),
-  })).filter(t => t.table);
-}
-
-function renderSplitTables() {
-  const tools = document.querySelector('.table-tools');
-  if (tools) tools.hidden = true;
-  const host = $('#samples').closest('.table-scroll').parentElement;
-  const cols = activeColumns();
-
-  $('#samples').closest('.table-scroll').hidden = true;
-  APP.sample_tables.forEach(t => {
-    if (document.getElementById('block-' + t.id)) return;
-    const div = document.createElement('div');
-    div.id = 'block-' + t.id;
-    div.className = 'sample-block';
-    div.innerHTML =
-      `<h3>${t.title}</h3>` +
-      `<div class="table-tools"><label>Number of samples` +
-      `<input type="number" id="row-count-${t.id}" min="1" value="1" step="1">` +
-      `</label></div>` +
-      `<div class="table-scroll"><table id="samples-${t.id}"></table></div>`;
-    host.appendChild(div);
-    div.querySelector('input').addEventListener('change', e => {
-      setSplitRows(t.id, Math.max(1, Math.min(MAX_ROWS,
-        parseInt(e.target.value, 10) || 1)));
-      validate(); saveDraft();
-    });
-  });
-
-  splitTables().forEach(t => {
-    t.table.innerHTML = '<thead><tr><th></th>' +
-      cols.map(c => `<th>${c}</th>`).join('') + '</tr></thead><tbody></tbody>';
-    setSplitRows(t.id, 1);
-  });
-  syncSplitVisibility();
-}
-
-function setSplitRows(id, n) {
-  const t = splitTables().find(x => x.id === id);
-  if (!t) return;
-  const body = t.table.querySelector('tbody');
-  while (body.rows.length > n) body.deleteRow(-1);
-  while (body.rows.length < n) {
-    const tr = body.insertRow();
-    tr.innerHTML = `<td class="rownum">${body.rows.length}</td>` +
-      activeColumns().map(c => `<td>${cell(c)}</td>`).join('');
-  }
-  if (t.count) t.count.value = body.rows.length;
-}
-
-/* A table for an instrument nobody ordered is a table nobody should fill. */
-function syncSplitVisibility() {
-  splitTables().forEach(t => {
-    const gate = document.getElementById('c-' + t.when);
-    t.block.hidden = !!gate && gate.value !== 'Yes';
-  });
 }
 
 /* Swap the columns without losing what has been typed: anything whose column
@@ -589,7 +551,8 @@ function reshapeSamples() {
     const row = {};
     before.forEach((c, i) => {
       const el = tr.querySelectorAll('input,select')[i];
-      if (el && el.value.trim()) row[c] = el.value.trim();
+      const v = cellRead(el);
+      if (v) row[c] = v;
     });
     return row;
   });
@@ -603,16 +566,15 @@ function reshapeSamples() {
   [...$('#samples tbody').rows].forEach((tr, i) => {
     after.forEach(c => {
       const el = tr.querySelector(`[data-col="${c}"]`);
-      if (el && kept[i] && kept[i][c] !== undefined) el.value = kept[i][c];
+      if (kept[i] && kept[i][c] !== undefined) cellWrite(el, kept[i][c]);
     });
   });
 
   if (lost.length) {
     const note = $('#table-report');
     note.hidden = false; note.className = 'msg warn';
-    note.textContent = 'The sample table changed for an extraction submission. ' +
-      'These columns no longer apply and their values were dropped: ' +
-      lost.join(', ') + '.';
+    note.textContent = 'The sample table changed. These columns no longer ' +
+      'apply and their values were dropped: ' + lost.join(', ') + '.';
   }
   validate(); saveDraft();
 }
@@ -645,6 +607,16 @@ function cell(col) {
     return `<select data-col="${col}"><option value=""></option>` +
       APP.sample_library_types.map(o => `<option>${o}</option>`).join('') + '</select>';
   }
+  /* Defaults to Both, because that is what almost every submission wants.
+   * data-default marks it as an answer nobody typed, so a row carrying only
+   * this is still an empty row — see rowHasData. */
+  if (APP.run_on_column && col === APP.run_on_column.column) {
+    const cfg = APP.run_on_column;
+    return `<select data-col="${col}" data-default="1">` +
+      [cfg.both, ...orderedInstruments()]
+        .map((o, i) => `<option${i === 0 ? ' selected' : ''}>${o}</option>`).join('') +
+      '</select>';
+  }
   if (col === APP.quant_column) {
     return `<select data-col="${col}"><option value=""></option>` +
       APP.quant_options.map(o => `<option>${o}</option>`).join('') + '</select>';
@@ -652,16 +624,31 @@ function cell(col) {
   return `<input data-col="${col}">`;
 }
 
-/* Every sample row currently on the page. One table on seventeen forms, two on
- * Q/Q — the validator and the exporter should not care which. */
+/* Every sample row on the page. Kept as a function because the validator, the
+ * exporter and the draft all need the same list. */
 function allSampleRows() {
-  if (!APP.sample_tables) return [...document.querySelectorAll('#samples tbody tr')];
-  return splitTables().filter(t => !t.block.hidden)
-    .flatMap(t => [...t.table.querySelectorAll('tbody tr')]);
+  return [...document.querySelectorAll('#samples tbody tr')];
 }
 
+/* A tick column is a checkbox, and an unchecked checkbox still has a truthy
+ * .value ("on"), so reading one with .value marks every empty row as filled.
+ * One pair of accessors, used by every reader and writer of a sample cell. */
+const isTick = el => !!el && el.type === 'checkbox';
+const cellRead = el => !el ? '' : (isTick(el) ? (el.checked ? 'Yes' : '') : el.value.trim());
+const cellWrite = (el, v) => {
+  if (!el) return;
+  if (isTick(el)) el.checked = /^(yes|y|1|true|x|v)$/i.test(String(v == null ? '' : v).trim());
+  else el.value = v == null ? '' : v;
+};
+
+/* A column that answers itself is not evidence the row was filled in: the
+ * instrument column starts at Both, and counting it would make every blank row
+ * look used — breaking the row count, the "rows contain data" warning, and the
+ * rule that empty rows are never exported. */
 const rowHasData = tr =>
-  [...tr.querySelectorAll('input,select')].some(i => i.value.trim());
+  [...tr.querySelectorAll('input,select')]
+    .filter(el => !el.dataset.default)
+    .some(el => cellRead(el));
 
 /* ── bioinformatics, always the final section ──────────────────────────── */
 function renderBioinformatics() {
@@ -1013,11 +1000,14 @@ function validate() {
 
   const seen = new Set();
   allSampleRows().forEach((tr, i) => {
-    const get = c => { const el = tr.querySelector(`[data-col="${c}"]`); return el ? el.value.trim() : ''; };
+    const get = c => cellRead(tr.querySelector(`[data-col="${c}"]`));
     const name = get('Sample name');
     if (name) {
       if (ILLEGAL.test(name)) problems.push(`Row ${i + 1}: illegal character in sample name`);
-      if (seen.has(name)) problems.push(`Row ${i + 1}: duplicate sample name "${name}"`);
+      /* doc 05 §16.8 — not a rule on every form. Q/Q measures the same
+       * material more than once, so the same name twice is honest. */
+      if (!APP.allow_duplicate_names && seen.has(name))
+        problems.push(`Row ${i + 1}: duplicate sample name "${name}"`);
       seen.add(name);
     }
     const conc = get('ng/ul');
@@ -1089,7 +1079,7 @@ function offerRestore() {
 }
 
 function applyDraft(d) {
-  if (!APP.sample_tables) setRows(d.rows.length || 1);
+  setRows(d.rows.length || 1);
   Object.entries(d.fields).forEach(([id, v]) => { const el = document.getElementById(id); if (el) el.value = v; });
   Object.entries(d.groups || {}).forEach(([name, vals]) => {
     document.querySelectorAll(`input[name="${name}"]`).forEach(el => {
@@ -1098,25 +1088,9 @@ function applyDraft(d) {
   });
   if ($('#c-analysis') && $('#c-analysis').value === 'Yes')
     $('#c-analysis').dispatchEvent(new Event('change'));
-  /* Restore across whichever tables the form has. The visible tables depend on
-   * the answers restored just above, so re-sync before filling. */
-  if (APP.sample_tables) {
-    syncSplitVisibility();
-    let r = 0;
-    splitTables().filter(t => !t.block.hidden).forEach(t => {
-      const mine = d.rows.slice(r).length;
-      setSplitRows(t.id, Math.max(1, Math.min(mine, d.rows.length - r) || 1));
-      [...t.table.querySelectorAll('tbody tr')].forEach(tr => {
-        [...tr.querySelectorAll('input,select')].forEach((inp, c) => {
-          inp.value = (d.rows[r] || [])[c] || ''; });
-        r++;
-      });
-    });
-  } else {
-    [...$('#samples tbody').rows].forEach((tr, r) =>
-      [...tr.querySelectorAll('input,select')].forEach((inp, c) => {
-        inp.value = (d.rows[r] || [])[c] || ''; }));
-  }
+  [...$('#samples tbody').rows].forEach((tr, r) =>
+    [...tr.querySelectorAll('input,select')].forEach((inp, c) =>
+      cellWrite(inp, (d.rows[r] || [])[c])));
   validate();
 }
 
@@ -1291,30 +1265,18 @@ function collect() {
   }
 
   /* ── sheet 2: the samples ──────────────────────────────────────────────── */
-  const sheetFor = rows => {
-    const out = [['#', ...activeColumns()].map(K)];
-    rows.forEach((tr, i) => {
-      if (!rowHasData(tr)) return;              // never export empty rows
-      out.push([i + 1, ...[...tr.querySelectorAll('input,select')].map(el => el.value.trim())]);
-    });
-    return out;
-  };
-  const samples = sheetFor(allSampleRows());
+  const samples = [['#', ...activeColumns()].map(K)];
+  allSampleRows().forEach((tr, i) => {
+    if (!rowHasData(tr)) return;                // never export empty rows
+    samples.push([i + 1,
+                  ...[...tr.querySelectorAll('input,select')].map(cellRead)]);
+  });
 
   const sheets = [
     { name: 'Submission', rows: submission, cols: [34, 62] },
   ];
-  const widths = [5, ...activeColumns().map(c => c === 'Remarks' ? 34 : 16)];
-  if (APP.sample_tables) {
-    /* One sheet per instrument, named for it, so the lab can see at a glance
-     * that three tubes are for Qubit and one is for TapeStation. */
-    splitTables().filter(t => !t.block.hidden).forEach(t => {
-      const rows = sheetFor([...t.table.querySelectorAll('tbody tr')]);
-      if (rows.length > 1) sheets.push({ name: t.title, rows, cols: widths });
-    });
-  } else {
-    sheets.push({ name: 'Samples', rows: samples, cols: widths });
-  }
+  sheets.push({ name: 'Samples', rows: samples,
+                cols: [5, ...activeColumns().map(c => c === 'Remarks' ? 34 : 16)] });
 
   /* ── sheet 3: analysis, only when there is any ─────────────────────────── */
   const panel = document.querySelectorAll('#analysis-panel textarea');
@@ -1495,7 +1457,7 @@ async function uploadTable(file) {
         if (v && !ok) { unknownQuant++; return; }
         cell.value = [...cell.options].find(o => o.value.toLowerCase() === v.toLowerCase())?.value || '';
       } else {
-        cell.value = v;
+        cellWrite(cell, v);
       }
     });
   });
