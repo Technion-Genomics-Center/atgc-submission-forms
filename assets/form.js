@@ -624,6 +624,21 @@ function cell(col) {
   return `<input data-col="${col}">`;
 }
 
+/* Rows the researcher singled out for ONE instrument.
+ *
+ * The column defaults to Both, so the exceptions ARE the reason to read it -
+ * and in a rack of twenty rows a single "Qubit" is easy to scroll straight
+ * past. Highlighted here on the page, and again in the exported workbook
+ * (Nitsan, 2026-10-05). */
+function markSingleInstrumentRows() {
+  const cfg = APP.run_on_column;
+  if (!cfg) return;
+  allSampleRows().forEach(tr => {
+    const v = cellRead(tr.querySelector(`[data-col="${cfg.column}"]`));
+    tr.classList.toggle('one-instrument', !!v && v !== cfg.both);
+  });
+}
+
 /* Every sample row on the page. Kept as a function because the validator, the
  * exporter and the draft all need the same list. */
 function allSampleRows() {
@@ -904,6 +919,11 @@ function renderBranch(kind) {
 
 /* ── validation — nine blocking rules, doc 05 §18.1 ────────────────────── */
 function validate() {
+  /* Not a validation - a single instrument is a legitimate choice, never a
+   * problem. It lives here because every path that changes a sample cell ends
+   * in validate(): typing, the draft restore, an uploaded table, a reshape. */
+  markSingleInstrumentRows();
+
   const problems = [];
   const mark = (sel, bad) => {
     const el = document.querySelector(sel);
@@ -1266,10 +1286,19 @@ function collect() {
 
   /* ── sheet 2: the samples ──────────────────────────────────────────────── */
   const samples = [['#', ...activeColumns()].map(K)];
+  const runOn = APP.run_on_column;
+  const runOnAt = runOn ? activeColumns().indexOf(runOn.column) : -1;
   allSampleRows().forEach((tr, i) => {
     if (!rowHasData(tr)) return;                // never export empty rows
-    samples.push([i + 1,
-                  ...[...tr.querySelectorAll('input,select')].map(cellRead)]);
+    const values = [...tr.querySelectorAll('input,select')].map(cellRead);
+    /* The highlight travels with the file. The lab works from the workbook,
+     * not from the page, so colouring the row on screen alone would warn the
+     * one person who already knows. */
+    const one = runOnAt !== -1 && !!values[runOnAt] && values[runOnAt] !== runOn.both;
+    samples.push(one
+      ? [{ v: i + 1, s: 'mark' },
+         ...values.map((v, c) => ({ v, s: c === runOnAt ? 'markkey' : 'mark' }))]
+      : [i + 1, ...values]);
   });
 
   const sheets = [

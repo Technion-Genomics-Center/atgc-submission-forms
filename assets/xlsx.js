@@ -107,7 +107,8 @@
 
   /* Style indices, matching the order of <cellXfs> below. A cell is either a
    * bare value or {v, s} where s is one of these names. */
-  const S = { plain: 0, title: 1, section: 2, label: 3, head: 4, sub: 5 };
+  const S = { plain: 0, title: 1, section: 2, label: 3, head: 4, sub: 5,
+              mark: 6, markkey: 7 };
 
   function sheetXml(rows, cols, withDrawing) {
     const widths = cols && cols.length
@@ -208,6 +209,9 @@ ${sheets.map((s, i) => `<Relationship Id="rId${i + 1}" Type="http://schemas.open
      * application's section colour, passed in by form.js. */
     const accent = (opts.accent || '1DA5FF').replace('#', '').toUpperCase();
     const NAVY = '112954';
+    /* A tint of the amber the pages already warn in (--warn #fda13c), light
+     * enough to read black text through at every zoom Excel offers. */
+    const AMBER = 'FFF1DC';
 
     files.push({
       name: 'xl/styles.xml',
@@ -221,24 +225,27 @@ ${sheets.map((s, i) => `<Relationship Id="rId${i + 1}" Type="http://schemas.open
   <font><sz val="11"/><b/><name val="Calibri"/><color rgb="FFFFFFFF"/></font>
   <font><sz val="10"/><i/><name val="Calibri"/><color rgb="FF5F7488"/></font>
 </fonts>
-<fills count="4">
+<fills count="5">
   <fill><patternFill patternType="none"/></fill>
   <fill><patternFill patternType="gray125"/></fill>
   <fill><patternFill patternType="solid"><fgColor rgb="FF${accent}"/><bgColor indexed="64"/></patternFill></fill>
   <fill><patternFill patternType="solid"><fgColor rgb="FF${NAVY}"/><bgColor indexed="64"/></patternFill></fill>
+  <fill><patternFill patternType="solid"><fgColor rgb="FF${AMBER}"/><bgColor indexed="64"/></patternFill></fill>
 </fills>
 <borders count="2">
   <border/>
   <border><bottom style="thin"><color rgb="FFE3EBF2"/></bottom></border>
 </borders>
 <cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>
-<cellXfs count="6">
+<cellXfs count="8">
   <xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment horizontal="left" vertical="top" wrapText="1"/></xf>
   <xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment horizontal="left" vertical="center"/></xf>
   <xf numFmtId="0" fontId="2" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1" applyAlignment="1"><alignment horizontal="left" vertical="center"/></xf>
   <xf numFmtId="0" fontId="3" fillId="0" borderId="1" xfId="0" applyFont="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="top" wrapText="1"/></xf>
   <xf numFmtId="0" fontId="4" fillId="3" borderId="0" xfId="0" applyFont="1" applyFill="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1"/></xf>
   <xf numFmtId="0" fontId="5" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment horizontal="left" vertical="top" wrapText="1"/></xf>
+  <xf numFmtId="0" fontId="0" fillId="4" borderId="0" xfId="0" applyFill="1" applyAlignment="1"><alignment horizontal="left" vertical="top" wrapText="1"/></xf>
+  <xf numFmtId="0" fontId="3" fillId="4" borderId="0" xfId="0" applyFont="1" applyFill="1" applyAlignment="1"><alignment horizontal="left" vertical="top" wrapText="1"/></xf>
 </cellXfs>
 </styleSheet>`
     });
