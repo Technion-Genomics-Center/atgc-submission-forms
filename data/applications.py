@@ -501,17 +501,17 @@ RULES = {
          run_on_column=dict(
              column="Instrument requested",
              both="Both",
-             # Nitsan, 2026-10-05. Ordering the Qubit at all means we measure
-             # the concentration ourselves, so asking the researcher for it -
-             # and for the instrument they measured it on - is asking for work
-             # we are about to do. Dropped whenever Qubit is ordered, with or
-             # without TapeStation.
+             # Dropped only when the Qubit is the ONLY instrument ordered.
+             # Then every sample gets a concentration from us and asking for one
+             # is asking for work we are about to do.
              #
-             # They stay for TapeStation ALONE, where the concentration is what
-             # decides which TapeStation kit to use and nobody has measured it
-             # for us.
+             # Kept in every other case, including when BOTH are ordered
+             # (Nitsan, 2026-10-05 - this corrects the first version of the
+             # rule): a row marked TapeStation gets no Qubit reading, so it
+             # still needs a concentration. The columns cover the whole table
+             # and the researcher fills in the rows that need them.
              drops_columns=["ng/ul", "Quantified by"],
-             drops_when="qubit",
+             drops_when_only="qubit",
              options=[dict(label="Qubit", gate="qubit"),
                       dict(label="TapeStation", gate="tapestation")]),
          # Nitsan, 2026-10-05: do NOT make unique sample names a rule here. The

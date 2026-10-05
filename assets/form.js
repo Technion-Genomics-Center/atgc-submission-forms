@@ -419,14 +419,14 @@ function activeColumns() {
   const cfg = APP.run_on_column;
   if (!cfg) return base;
 
-  /* Two independent decisions, and they do not switch at the same moment.
-   *
-   * Columns go away as soon as the instrument that measures them is ordered —
-   * Qubit alone is enough, because we are about to measure the concentration
-   * ourselves. The per-row instrument column only appears once there are two
-   * instruments to choose between. */
-  const gate = cfg.drops_when && $('#c-' + cfg.drops_when);
-  const measuredByUs = !!gate && gate.value === 'Yes';
+  /* Columns go away only when the instrument that measures them is the ONLY one
+   * ordered. With both ordered they stay, because a row the researcher marks
+   * TapeStation never reaches the Qubit and so still needs a concentration —
+   * the columns cover the whole table and are filled per row. */
+  const ordered = orderedInstruments();
+  const onlyOne = cfg.drops_when_only;
+  const measuredByUs = !!onlyOne && ordered.length === 1 &&
+    ordered[0] === (cfg.options.find(o => o.gate === onlyOne) || {}).label;
   const kept = measuredByUs
     ? base.filter(c => !(cfg.drops_columns || []).includes(c))
     : base;
