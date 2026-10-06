@@ -429,14 +429,16 @@ RULES = {
          # the numbers that decide how it is diluted and loaded; the table
          # below describes what is inside it. Nitsan, 2026-10-06.
          #
-         # All three already exist on the workbook this form replaces, under
-         # "User-Prepared Library Information" - so this is the section moving
-         # across, not a new question. Its fourth field, Pool volume [ul], is
-         # not here: Nitsan asked for these three.
+         # All four already exist on the workbook this form replaces, as a 2x2
+         # block under "User-Prepared Library Information" (I8/M8, I9/M9) - so
+         # this is the section moving across, not a new question. Volume was
+         # briefly left out and put back on 2026-10-06; the form now collects
+         # the same four facts the sheet did.
          pool_fields=[
-             dict(id="pool-conc", label="Pool concentration [ng/ul]"),
-             dict(id="pool-size", label="Pool average peak size [bps]"),
-             dict(id="pool-nm",   label="Pool molarity [nM]"),
+             dict(id="pool-conc",   label="Pool concentration [ng/ul]"),
+             dict(id="pool-size",   label="Pool average peak size [bps]"),
+             dict(id="pool-nm",     label="Pool molarity [nM]"),
+             dict(id="pool-volume", label="Pool volume [ul]"),
          ]),
 
     # ── forms with the question but no panel, doc 05 §12.2 ──────────────────
