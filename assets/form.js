@@ -93,6 +93,17 @@ function field(f) {
   return wrap;
 }
 
+/* Facts about the pool as a whole, for a form that takes a finished library.
+ * Its own section, above the table, because the table answers a different
+ * question: what is IN the pool, one row per library (doc 05 §16.10). */
+function renderPool() {
+  const fields = APP.pool_fields || [];
+  if (!fields.length) return;                   // every other form
+  const box = $('#pool-fields');
+  fields.forEach(f => box.appendChild(field({ ...f, type: 'number' })));
+  $('#pool').hidden = false;
+}
+
 function renderHeader() {
   const box = $('#header-fields');
   HEADER_FIELDS.forEach(f => box.appendChild(field(f)));
@@ -1272,6 +1283,14 @@ function collect() {
     if (match) submission.push([L('Flow cell (catalog name)'), match.catalog]);
   }
 
+  /* The pool block, kept together and in the order the page asks it, rather
+   * than scattered among the sequencing choices it is not one of. */
+  const pool = APP.pool_fields || [];
+  if (pool.length) {
+    submission.push([], [H('Library pool'), H('')]);
+    pool.forEach(f => submission.push([L(f.label), val('f-' + f.id)]));
+  }
+
   submission.push([], [H('Confirmation'), H('')]);
   submission.push([L('Information confirmed correct'),
                    document.getElementById('confirm').checked ? 'YES' : 'no']);
@@ -1724,6 +1743,7 @@ document.addEventListener('keydown', e => {
 
 /* ── wire up ───────────────────────────────────────────────────────────── */
 renderHeader();
+renderPool();
 renderChoices();
 renderQcPanel();
 renderSamples();

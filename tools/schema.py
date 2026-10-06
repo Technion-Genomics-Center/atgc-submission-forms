@@ -583,6 +583,8 @@ def build_spec(app, surveyed):
         # A per-sample "which instrument" column, added only when more than
         # one instrument is ordered (doc 05 §16.8).
         "run_on_column": app.get("run_on_column"),
+        # Facts about the pool as a whole, above the sample table (doc 05 §16.10).
+        "pool_fields": app.get("pool_fields"),
         # doc 05 §18.1 rule 5 does not apply where the same name is legitimate.
         "allow_duplicate_names": app.get("allow_duplicate_names", False),
         "qc_panel": app.get("qc_panel"),

@@ -424,7 +424,20 @@ RULES = {
          no_library_prep=True, no_experimental_group=True,
          # No prep to choose, but the library still gets measured before it
          # goes on a flow cell (Nitsan, 2026-08-12).
-         qc_services=["Qubit measurement", "TapeStation"]),
+         qc_services=["Qubit measurement", "TapeStation"],
+         # The POOL, not the samples. One finished pool arrives and these are
+         # the numbers that decide how it is diluted and loaded; the table
+         # below describes what is inside it. Nitsan, 2026-10-06.
+         #
+         # All three already exist on the workbook this form replaces, under
+         # "User-Prepared Library Information" - so this is the section moving
+         # across, not a new question. Its fourth field, Pool volume [ul], is
+         # not here: Nitsan asked for these three.
+         pool_fields=[
+             dict(id="pool-conc", label="Pool concentration [ng/ul]"),
+             dict(id="pool-size", label="Pool average peak size [bps]"),
+             dict(id="pool-nm",   label="Pool molarity [nM]"),
+         ]),
 
     # ── forms with the question but no panel, doc 05 §12.2 ──────────────────
     "nanopore": dict(analysis=None,
