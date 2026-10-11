@@ -1024,6 +1024,42 @@ function validate() {
     } else { mark2('tskitother', false); }
   }
 
+  /* doc 05 §18.1 rule 12 - extraction happens in one building only.
+   *
+   * Nitsan, 2026-10-11. A submission asking for extraction at a lab that has
+   * no extraction bench is not a form to tidy up on arrival: the tubes travel
+   * to the wrong building. So it blocks, and the message names the lab that
+   * can take them rather than only saying no.
+   *
+   * The labs come from the extraction application's own routing, so this
+   * follows routing.csv and never hardcodes a building. */
+  const extLabs = APP.extraction_labs || [];
+  const wantsExt = APP.extraction_always ||
+    ($('#c-needext') && $('#c-needext').value === 'Yes');
+  const labWrap = $('[data-field="lab"]');
+  const wrongLab = !!APP.extraction && wantsExt && extLabs.length &&
+    !!labEl.value && !extLabs.includes(labEl.value);
+  let extNote = labWrap.querySelector('.ext-lab-note');
+  const extWrap = document.querySelector('[data-field="needext"]');
+  /* Cleared as deliberately as it is set: nothing else owns the red on these
+   * two fields, so leaving it behind would outlive the problem. */
+  if (extWrap) extWrap.classList.toggle('is-error', wrongLab);
+  if (wrongLab) {
+    problems.push(`Extraction is done at ${extLabs.join(' or ')} only — ` +
+                  `change the lab, or set extraction to No`);
+    labWrap.classList.add('is-error');
+    if (!extNote) {
+      extNote = document.createElement('div');
+      extNote.className = 'msg err ext-lab-note';
+      labWrap.appendChild(extNote);
+    }
+    extNote.textContent =
+      `DNA and RNA extraction is performed at ${extLabs.join(' or ')} only. ` +
+      'Samples for extraction must be submitted there.';
+  } else if (extNote) {
+    extNote.remove();
+  }
+
   need('libprep', 'Library preparation');
   need('flowcell', 'Flow cell');
   need('qc', 'QC required');
