@@ -561,6 +561,12 @@ def build_spec(app, surveyed):
         "qc_services": app.get("qc_services"),
         "cosmx_addon": app.get("cosmx_addon"),
         "routing": routing_for(app["slug"]),
+        # Where DNA/RNA extraction can actually be done, taken from the
+        # extraction application's OWN routing - so blanking a lab in
+        # routing.csv both removes it from the extraction form's dropdown and
+        # teaches every other form's warning where to send people. One fact,
+        # one place (doc 05 §18.1 rule 12).
+        "extraction_labs": [r["lab"] for r in routing_for("extraction")],
         "addresses": {l["label"]: {"lines": l.get("address", []),
                                    "phone": l.get("phone", "")}
                       for l in LABS},
