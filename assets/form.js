@@ -244,7 +244,19 @@ function renderChoices() {
     });
   }
   add('flowcell', 'Flow cell', v.FlowCell, quoteHelp);
-  add('runmode', 'Run mode', v.RunMode);
+  /* Run mode, OR the read lengths it would have been inferred from - never
+   * both. Asking for 151 + 151 and then also asking "paired end?" is asking
+   * the same thing twice and inviting the two answers to disagree. */
+  if (!APP.read_lengths) add('runmode', 'Run mode', v.RunMode);
+  (APP.read_lengths || []).forEach(f => {
+    const wrap = document.createElement('div');
+    wrap.className = 'field';
+    wrap.dataset.field = f.id;
+    wrap.innerHTML =
+      `<label>${f.label}<input type="text" id="c-${f.id}"></label>` +
+      (f.hint ? `<p class="hint">${f.hint}</p>` : '');
+    box.appendChild(wrap);
+  });
   add('runs', 'Number of flow cells', v['Run#'], null, '1');
 
   /* Extraction is two questions, not one: most submissions arrive already
@@ -1060,6 +1072,19 @@ function validate() {
     extNote.remove();
   }
 
+  /* doc 05 §18.1 rule 13 - the read length the pool needs. Nitsan, 2026-10-13.
+   * The lab cannot set up the run without it, and there is no sensible
+   * default to fall back on, so it blocks the way the flow cell does. */
+  (APP.read_lengths || []).forEach(f => {
+    if (!f.required) return;
+    const wrap = document.querySelector(`[data-field="${f.id}"]`);
+    const el = $('#c-' + f.id);
+    if (!wrap || !el || hiddenField(wrap)) return;
+    const bad = !el.value.trim();
+    wrap.classList.toggle('is-error', bad);
+    if (bad) problems.push(f.label);
+  });
+
   need('libprep', 'Library preparation');
   need('flowcell', 'Flow cell');
   need('qc', 'QC required');
@@ -1288,8 +1313,20 @@ function collect() {
       return;
     }
     const sel = w.querySelector('select');
-    if (!sel) return;
-    submission.push([L(labelText(w.querySelector('label'))), sel.value]);
+    if (sel) {
+      submission.push([L(labelText(w.querySelector('label'))), sel.value]);
+      return;
+    }
+    /* A free-text answer among the choices - the read lengths, and the CosMx
+     * add-on gene count, which this loop has never exported because it only
+     * ever looked for a <select>. Radios and ticks are excluded: they are
+     * handled above, and an unchecked radio still carries a value. */
+    const input = w.querySelector('input:not([type="radio"]):not([type="checkbox"])');
+    /* Exported even when empty, exactly as a select is. A blank "Read 2
+     * length" says the run is single-read; a row that is simply absent says
+     * nothing, and the lab cannot tell it from a question never asked. */
+    if (input)
+      submission.push([L(labelText(w.querySelector('label'))), input.value.trim()]);
   });
 
   /* Cells or nuclei belongs with the samples, not the sequencing choices, so it
