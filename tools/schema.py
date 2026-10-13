@@ -591,6 +591,8 @@ def build_spec(app, surveyed):
         "run_on_column": app.get("run_on_column"),
         # Facts about the pool as a whole, above the sample table (doc 05 §16.10).
         "pool_fields": app.get("pool_fields"),
+        # Read lengths asked directly, replacing Run mode (doc 05 §16.12).
+        "read_lengths": app.get("read_lengths"),
         # doc 05 §18.1 rule 5 does not apply where the same name is legitimate.
         "allow_duplicate_names": app.get("allow_duplicate_names", False),
         "qc_panel": app.get("qc_panel"),

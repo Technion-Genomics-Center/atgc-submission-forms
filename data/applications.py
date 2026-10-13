@@ -439,6 +439,18 @@ RULES = {
              dict(id="pool-size",   label="Pool average peak size [bps]"),
              dict(id="pool-nm",     label="Pool molarity [nM]"),
              dict(id="pool-volume", label="Pool volume [ul]"),
+         ],
+         # Nitsan, 2026-10-13. The researcher built the library and knows the
+         # cycles it needs, so ask for them. Single read / paired end is a
+         # CONCLUSION drawn from those two numbers, not a separate question -
+         # and answering it instead of them leaves the lab to guess the split.
+         # Declaring this replaces the Run mode dropdown on this form.
+         #
+         # Free text, not a number: people write 2x150, "151", "26 (dark)".
+         read_lengths=[
+             dict(id="read1", label="Read 1 length", required=True),
+             dict(id="read2", label="Read 2 length",
+                  hint="Leave blank for a single-read run"),
          ]),
 
     # ── forms with the question but no panel, doc 05 §12.2 ──────────────────
