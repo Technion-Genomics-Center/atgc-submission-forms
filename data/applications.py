@@ -178,6 +178,26 @@ NEEDS_CATALOG_ENTRY = {
     "Nanopore DNA rapid library prep": "Nanopore kit, no service in the price list",
 }
 
+# ── read lengths, everywhere Run mode used to be ───────────────────────────
+# Nitsan, 2026-10-13 for user-prepared, extended to every form 2026-10-15.
+#
+# Single read / paired end is a CONCLUSION drawn from the two read lengths, not
+# a separate question - and answering it instead of them leaves the lab to
+# guess the split. So the numbers are asked directly, and Run mode is gone.
+#
+# Not a per-form flag: this replaces Run mode WHEREVER a form asked it, which
+# is the ten forms whose workbook has that question. A form that never asked it
+# - Q/Q, CLA, extraction, Nanopore, Olink, and the single-cell and spatial
+# forms, where the kit fixes the run - does not gain it now.
+#
+# Free text, not a number: people write 2x150, "151", "26 (dark)".
+READ_LENGTHS = [
+    dict(id="read1", label="Read 1 length", required=True),
+    dict(id="read2", label="Read 2 length",
+         hint="Leave blank for a single-read run"),
+]
+
+
 def _load_form_kits():
     """Which library preps each application offers.
 
@@ -439,18 +459,6 @@ RULES = {
              dict(id="pool-size",   label="Pool average peak size [bps]"),
              dict(id="pool-nm",     label="Pool molarity [nM]"),
              dict(id="pool-volume", label="Pool volume [ul]"),
-         ],
-         # Nitsan, 2026-10-13. The researcher built the library and knows the
-         # cycles it needs, so ask for them. Single read / paired end is a
-         # CONCLUSION drawn from those two numbers, not a separate question -
-         # and answering it instead of them leaves the lab to guess the split.
-         # Declaring this replaces the Run mode dropdown on this form.
-         #
-         # Free text, not a number: people write 2x150, "151", "26 (dark)".
-         read_lengths=[
-             dict(id="read1", label="Read 1 length", required=True),
-             dict(id="read2", label="Read 2 length",
-                  hint="Leave blank for a single-read run"),
          ]),
 
     # ── forms with the question but no panel, doc 05 §12.2 ──────────────────

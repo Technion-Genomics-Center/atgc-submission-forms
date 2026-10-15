@@ -20,7 +20,7 @@ sys.path.insert(0, str(ROOT.parent))          # for atgc.retired
 
 from data.applications import (EXTRACTION_COLUMNS, EXTRACTION_SERVICES,
                                FORM_PREPS, GROUP_OF, LABS,
-                               NEEDS_CATALOG_ENTRY, published)
+                               NEEDS_CATALOG_ENTRY, READ_LENGTHS, published)
 from survey_workbooks import survey, workbooks
 
 from atgc.retired import retired_reason
@@ -592,7 +592,9 @@ def build_spec(app, surveyed):
         # Facts about the pool as a whole, above the sample table (doc 05 §16.10).
         "pool_fields": app.get("pool_fields"),
         # Read lengths asked directly, replacing Run mode (doc 05 §16.12).
-        "read_lengths": app.get("read_lengths"),
+        # Platform-wide, so it is passed to every form; the page renders it
+        # only where Run mode would have been asked.
+        "read_lengths": app.get("read_lengths", READ_LENGTHS),
         # doc 05 §18.1 rule 5 does not apply where the same name is legitimate.
         "allow_duplicate_names": app.get("allow_duplicate_names", False),
         "qc_panel": app.get("qc_panel"),

@@ -244,11 +244,12 @@ function renderChoices() {
     });
   }
   add('flowcell', 'Flow cell', v.FlowCell, quoteHelp);
-  /* Run mode, OR the read lengths it would have been inferred from - never
-   * both. Asking for 151 + 151 and then also asking "paired end?" is asking
-   * the same thing twice and inviting the two answers to disagree. */
-  if (!APP.read_lengths) add('runmode', 'Run mode', v.RunMode);
-  (APP.read_lengths || []).forEach(f => {
+  /* The read lengths stand exactly where Run mode stood, on the ten forms
+   * that asked it. Never both: asking for 151 + 151 and then also asking
+   * "paired end?" is asking the same thing twice, and inviting the two answers
+   * to disagree. A form that never asked Run mode does not gain this - the kit
+   * fixes the run there (doc 05 §16.12). */
+  if (v.RunMode) (APP.read_lengths || []).forEach(f => {
     const wrap = document.createElement('div');
     wrap.className = 'field';
     wrap.dataset.field = f.id;
@@ -361,7 +362,8 @@ function renderChoices() {
    * kit declares which it is (data/applications.py), so the run questions
    * appear only for a kit that actually reaches a flow cell. */
   if (APP.sequenced_kits && $('#c-libprep')) {
-    const runFields = ['flowcell', 'runmode', 'runs'];
+    const runFields = ['flowcell', 'runs']
+      .concat((APP.read_lengths || []).map(f => f.id));
     const syncRun = () => {
       const sequenced = APP.sequenced_kits.includes($('#c-libprep').value);
       runFields.forEach(id => {
@@ -375,16 +377,12 @@ function renderChoices() {
     syncRun();
   }
 
-  /* Read length follows the flow cell: the shortest read of each part is run
-   * single-read, everything longer is paired-end. The researcher can override
-   * — this only sets the starting point. */
-  const fc = $('#c-flowcell'), rm = $('#c-runmode');
-  if (fc && rm) {
-    fc.addEventListener('change', () => {
-      const chosen = (v.FlowCell || []).find(o => o.label === fc.value);
-      if (chosen && chosen.runmode) rm.value = chosen.runmode;
-    });
-  }
+  /* The flow cell used to pre-set Run mode here. With Run mode gone there is
+   * nothing to pre-set: the catalog says a flow cell is paired-end, never how
+   * its cycles split, and guessing 150 + 150 from "300 cycles" would be
+   * inventing a number the researcher came to give us. The `runmode` field
+   * stays in the FlowCell vocabulary - it is read from the catalog, not
+   * written for this. */
 }
 
 /* ── cells or nuclei, doc 05 §16.4 ──────────────────────────────────────────
