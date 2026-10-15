@@ -143,7 +143,7 @@ drop it too — that is how CEL-seq2 and Infinium methylation were handled.
 | no prices in any page | the pages are public; `services.csv` carries prices (D12) |
 | no typos | `Basesapce`, `insturment` and friends were in 20 workbooks |
 | JS syntax | a broken script leaves the HTML perfectly valid, so everything else still "passes" |
-| recipients well formed | `linde@technion` looks fine in Excel and bounces in a mail client |
+| recipients well formed | `name@technion` looks fine in Excel and bounces in a mail client |
 | every application routed | a form with no recipient has nowhere to go |
 | no retired terms | MiSeq, `P3 50 cycles`, CEL-seq2 |
 | catalog gaps | an option nobody can be quoted for |
@@ -189,5 +189,3 @@ Do not push `dist/` by hand, and do not trust a green push to `main`.
       form.js                the form itself
       xlsx.js / xlsx_read.js writing and reading .xlsx, no dependencies
       quote.js               reading a QuoteDesk-stamped quote
-
-Source workbooks under `Y:\LAB\` are **read-only** and are never modified.
