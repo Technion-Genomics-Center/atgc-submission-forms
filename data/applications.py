@@ -575,8 +575,11 @@ RULES = {
                  # list that offers "Other" again.
                  other_label="Other — describe",
                  kits={
+                     # "High Sensitivity Genomic DNA", not "HS Genomic DNA"
+                     # (Nitsan, 2026-10-18): spelled out, like the D1000 beside
+                     # it. One list, one convention.
                      "DNA": ["D1000 DNA", "High Sensitivity D1000 DNA",
-                             "HS Genomic DNA"],
+                             "High Sensitivity Genomic DNA"],
                      "RNA": ["RNA [Eukaryotes]",
                              "High Sensitivity RNA [Eukaryotes]",
                              "RNA [Prokaryotes]",

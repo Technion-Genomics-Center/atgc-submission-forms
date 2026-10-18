@@ -429,6 +429,17 @@ def build_spec(app, surveyed):
             choices.append({"label": label, "source": c["source"]})
 
     # ── decisions that come from the registry, not the workbook ─────────────
+    # The QC panel carries its OWN kit lists and says so: "the workbook's
+    # Setting sheet still lists it; this list wins." The surveyed columns it
+    # overrides were still being shipped beside it, so the page carried three
+    # kits the lab no longer offers - Broad range RNA, Genomic DNA and a High
+    # Sensitivity D5000 DNA that never existed. Nothing read them, which is
+    # exactly why nobody noticed. Dropped at the source (Nitsan, 2026-10-18:
+    # "just want to make sure users can't see and chose genomic and other").
+    if app.get("qc_panel"):
+        for key in ("Qubit", "Tapestation", "TapeStation"):
+            vocab.pop(key, None)
+
     if app.get("no_sequencing"):
         for key in ("LibraryPrep", "FlowCell", "RunMode", "Run#", "Nextseq",
                     "RunType", "Instrument"):
