@@ -568,19 +568,19 @@ RULES = {
                  label="Do you require TapeStation?",
                  type_label="DNA or RNA?",
                  kit_label="TapeStation kit",
-                 # Nitsan, 2026-08-19. "Other" plus a free-text box, because
-                 # when Qubit and TapeStation are both ordered the Qubit result
-                 # decides which TapeStation kit is right - so the researcher
-                 # genuinely cannot know it yet. Forcing a pick would get a
-                 # guess; this gets the truth.
+                 # Nitsan, 2026-08-19, added "Other" plus a free-text box for
+                 # when the Qubit result decides the kit. Taken out on
+                 # 2026-10-18, with Genomic DNA, which the lab no longer runs -
+                 # HS Genomic DNA only. The free-text box is kept for a kit
+                 # list that offers "Other" again.
                  other_label="Other — describe",
                  kits={
                      "DNA": ["D1000 DNA", "High Sensitivity D1000 DNA",
-                             "Genomic DNA", "HS Genomic DNA", "Other"],
+                             "HS Genomic DNA"],
                      "RNA": ["RNA [Eukaryotes]",
                              "High Sensitivity RNA [Eukaryotes]",
                              "RNA [Prokaryotes]",
-                             "High Sensitivity RNA [Prokaryotes]", "Other"],
+                             "High Sensitivity RNA [Prokaryotes]"],
                  }),
          )),
 
