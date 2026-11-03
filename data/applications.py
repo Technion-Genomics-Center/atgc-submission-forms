@@ -306,6 +306,16 @@ RULES = {
          # Nitsan, 2026-08-19. Sample QC is not asked here: these
          # services measure the material as part of the run.
          no_qc=True,
+         # Nitsan, 2026-11-03: *"the project consists of slides. so the first
+         # coloum should be slide name. no description, no block number, no
+         # slide number."* A spatial submission is slides, not tubes: the
+         # researcher names the slide and that is the thing the lab handles,
+         # images and reports on. The three dropped columns came from the 2025
+         # workbook, which described an FFPE block the slide was cut from —
+         # three columns asking about the same slide the first column already
+         # names.
+         rename_columns={"Sample name": "Slide name"},
+         drop_columns=["Description", "Block number", "Slide number"],
          analysis=SPATIAL,
          # Nitsan, 2026-08-16. Same reasoning as 10X scRNA-seq: a Visium HD
          # library is read at a fixed length on a 100-cycle kit, and the run
