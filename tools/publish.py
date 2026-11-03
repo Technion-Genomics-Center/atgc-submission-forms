@@ -21,6 +21,7 @@ change before it says the word "live".
 from __future__ import annotations
 
 import argparse
+import os
 import shutil
 import subprocess
 import sys
@@ -39,13 +40,32 @@ WORKTREE = ROOT / ".ghpages"
 ALLOWED = {".html", ".css", ".js", ".jpg", ".png", ".svg", ".ico"}
 
 
+# Every child process talks UTF-8, in both directions. `text=True` alone
+# decodes with the console codepage, and on this Windows that is cp1252: the
+# build prints an em dash in its catalog-gap list, `fh.read()` raised
+# UnicodeDecodeError on byte 0x97 inside subprocess's own reader thread, and
+# publish.py died with `argument of type 'NoneType' is not iterable` — a
+# message about nothing, for a dash. `errors="replace"` keeps a stray byte
+# from ever stopping a publish again.
+TEXT = dict(capture_output=True, text=True, encoding="utf-8",
+            errors="replace")
+
+
+def _utf8_env():
+    """The child's environment, with Python forced to UTF-8 output."""
+    env = dict(os.environ)
+    env["PYTHONUTF8"] = "1"
+    env["PYTHONIOENCODING"] = "utf-8"
+    return env
+
+
 def run(*args, cwd=ROOT, check=True):
     # The repo lives on a UNC share, so a fresh worktree trips git's
     # dubious-ownership guard. Scope the exception to this process rather than
     # writing it into the user's global config.
     if args and args[0] == "git":
         args = ("git", "-c", "safe.directory=*") + args[1:]
-    r = subprocess.run(args, cwd=cwd, capture_output=True, text=True)
+    r = subprocess.run(args, cwd=cwd, env=_utf8_env(), **TEXT)
     if check and r.returncode:
         sys.exit(f"$ {' '.join(args)}\n{r.stdout}{r.stderr}")
     return r.stdout.strip()
@@ -53,9 +73,9 @@ def run(*args, cwd=ROOT, check=True):
 
 def build():
     r = subprocess.run([sys.executable, "build.py"], cwd=ROOT,
-                       capture_output=True, text=True)
-    print(r.stdout)
-    if r.returncode or "all build checks passed" not in r.stdout:
+                       env=_utf8_env(), **TEXT)
+    print(r.stdout or "", r.stderr or "")
+    if r.returncode or "all build checks passed" not in (r.stdout or ""):
         sys.exit("build failed — nothing published")
 
 
