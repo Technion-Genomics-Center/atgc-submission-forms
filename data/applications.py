@@ -319,14 +319,27 @@ RULES = {
          # are no longer offered. `catalog` is the canonical service each kit
          # bills as; None means the catalog has no entry yet (doc 05 §17).
          library_kits=[
-             dict(label="Visium HD", technology="sequencing",
+             # Nitsan, 2026-11-03: *"you are correct that we need to expand the
+             # submission forms options. it should be visium hd human, visium
+             # hd mouse etc."* `Visium HD` alone was one option against three
+             # kits — human, mouse and rat are different boxes with different
+             # part numbers (1000675 / 1000676 / 1001119), and a submission
+             # saying only "Visium HD" could not pick one, so it reached no
+             # bench recipe at all. The slide size is not asked: the 11 mm
+             # kits are not offered (see above), so every option here is the
+             # 6.5 mm one, and all three bill as the same service.
+             dict(label="Visium HD Human", technology="sequencing",
                   catalog="10X Visium HD 6.5mm  [2 slides]"),
+             dict(label="Visium HD Mouse", technology="sequencing",
+                  catalog="10X Visium HD 6.5mm  [2 slides]"),
+             dict(label="Visium HD Rat", technology="sequencing",
+                  catalog="10X Visium HD 6.5mm  [2 slides]"),
+             # A different kit, not a species of the one above (Nitsan,
+             # 2026-11-03), added to labprep.csv as `Visium HD 3', 6.5 mm`,
+             # part 1000857. The catalog entry and both prices arrived in the
+             # price list on 2026-11-01, so it no longer needs either flag.
              dict(label="Visium HD 3'", technology="sequencing",
-                  catalog="10X Visium HD 3' [2 slides]",
-                  # Billing name confirmed by Nitsan; the catalog entry itself
-                  # does not exist yet and has NO price. Needs adding via
-                  # Module 0 before this kit can be quoted.
-                  needs_catalog_entry=True, needs_price=True),
+                  catalog="10X Visium HD 3' [2 slides]"),
              # Nitsan, 2026-08-16. The six real panels, replacing four options
              # that named a plex count and a species but not the panel — a
              # researcher choosing "CosMx x1000 mouse" had not said whether
@@ -360,7 +373,8 @@ RULES = {
          primary_analysis=dict(
              label="Do you require primary analysis (SpaceRanger)?",
              catalog="Primary analysis- SpaceRanger",
-             only_for_kits=["Visium HD", "Visium HD 3'"]),
+             only_for_kits=["Visium HD Human", "Visium HD Mouse",
+                            "Visium HD Rat", "Visium HD 3'"]),
          # Nitsan, 2026-08-13. CosMx is a DIFFERENT TECHNOLOGY, not a different
          # setting: it is imaged on the instrument and never sequences, whatever
          # the kit. Visium is sequenced. Each kit above says which it is, so a
